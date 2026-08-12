@@ -1,0 +1,23 @@
+---
+title: "How to Fully Uninstall the Origin Agent from macOS"
+sidebarTitle: "macOS Uninstall"
+description: "Remove the Origin agent and its local state from a macOS endpoint using the bundled uninstall script."
+---
+
+Removing the Origin agent from macOS takes a single command. The bundled uninstall script handles everything — you do not need to manually remove individual components.
+
+## Run the uninstall script
+
+Open Terminal and run the following command with administrator privileges:
+
+```bash
+sudo /Applications/Origin.app/Contents/Resources/uninstall.sh
+```
+
+The script removes the **Origin agent** and its supporting binaries, along with the launch daemons and local state created during installation.
+
+No reboot is required after the script completes.
+
+<Tip>
+  After uninstalling, confirm removal by checking that the **Origin icon is no longer present in the macOS menu bar** and that the endpoint no longer reports recent activity under **Settings → Endpoint Inventory** in the Origin console. It may take a few minutes for the console to reflect the change.
+</Tip>

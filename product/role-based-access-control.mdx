@@ -1,0 +1,94 @@
+---
+title: "Role-Based Access Control: The Full Capability Matrix"
+sidebarTitle: "Access Control"
+description: "Exactly what each of Origin's eight built-in roles can see and do — endpoints, event content, AI prompt text, analytics, directory data, signals, and tenant administration."
+---
+
+This is the detailed capability reference for Origin's eight built-in roles. It exists to answer one question precisely: _if I grant someone this role, what can they reach?_
+
+For how grants work, how to invite users, and guidance on choosing between roles, see [User Management](/getting-started/user-management).
+
+## The eight roles
+
+| Role | Persona |
+| --- | --- |
+| **Tenant Admin** | Tenant owner / IT manager |
+| **SecOps** | SOC analyst / security engineer |
+| **Detection Engineer** | Detection content owner |
+| **IT / Fleet Admin** | Endpoint / fleet administrator |
+| **Viewer** | Auditor / exec / read-only |
+| **Vendor Support** | External support engineer |
+| **Security Engineering** | Platform / integration engineer |
+| **No Data Access** | Familiarization / training |
+
+These are the names as they appear in the role picker in **Settings → User Management**.
+
+Every role applies across the whole tenant. Nothing about a role is implicit — if a capability isn't granted below, that role can't reach it.
+
+## Data-facing roles
+
+Five roles work with monitored data. **Legend:** ✓ full access · ◐ read-only or limited · — no access
+
+| Capability | Tenant Admin | SecOps | Detection Engineer | IT / Fleet Admin | Viewer |
+| --- | :-: | :-: | :-: | :-: | :-: |
+| List & read endpoints | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Manage endpoints (revoke certs, etc.) | ✓ | — | — | ✓ | — |
+| Endpoint metadata (OS, agent build) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Sensitive endpoint metadata (installed software, processes) | ✓ | — | ✓ | — | — |
+| Event metadata (time, source, severity) | ✓ | ✓ | ✓ | — | ✓ |
+| Raw event payloads (command args, file content) | ✓ | — | ✓ | — | — |
+| AI-session metadata (model, token totals) | ✓ | ✓ | ✓ | — | ✓ |
+| AI prompt / response text | ✓ | — | ✓ | — | — |
+| Aggregate analytics | ✓ | ✓ | ✓ | — | ✓ |
+| Row-level analytics export | ✓ | — | ✓ | — | — |
+| Read directory data (users, groups, devices) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Sensitive directory data (name, email, phone, manager) | ✓ | — | ✓ | — | — |
+| Request endpoint telemetry | ✓ | — | — | ✓ | — |
+| Manage provisioning tokens | ✓ | — | — | ✓ | — |
+| Read detection signals | ✓ | ✓ | ✓ | — | — |
+| Manage / deploy detection signals | ✓ | — | ✓ | — | — |
+| Read the tenant audit log | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Manage users & roles | ✓ | — | — | — | — |
+
+<Note>
+  **Detection Engineer** is the only non-admin role that reads AI prompt text, raw event payloads, and directory PII. Everything SecOps can do, it can do — plus the content needed to write and tune detections.
+</Note>
+
+## Operational and limited roles
+
+These three are defined by what they _can't_ reach, so they're listed separately rather than as mostly-empty columns.
+
+| Capability | Vendor Support | Security Engineering | No Data Access |
+| --- | :-: | :-: | :-: |
+| Sign in & navigate the dashboard | ✓ | ✓ | ✓ |
+| List endpoints & read metadata | ✓ | — | — |
+| Read agent health / request telemetry | ◐ | ✓ | — |
+| Read installers & download URLs | ✓ | ✓ | — |
+| Integration / connector config | ◐ | ✓ | — |
+| Configure integrations & run syncs | — | ✓ | — |
+| Read / write tenant configuration | — | ✓ | — |
+| Read detection signals | — | ✓ | — |
+| Read the tenant audit log | ✓ | ✓ | — |
+| Events / AI sessions / analytics | — | — | — |
+| Manage users, roles, destructive settings | — | — | — |
+
+## Sensitive surfaces
+
+Every analytics column is classed **Default** or **Sensitive**. Default covers metadata — timestamps, model names, identifiers, counts, status. Sensitive covers anything that exposes private content in bulk, and reading it requires a dedicated permission on top of the role's normal read.
+
+| Sensitive surface | Permission | Held by |
+| --- | --- | --- |
+| Raw event payloads (command args, file content) | `events.read.sensitive` | Tenant Admin · Detection Engineer |
+| AI prompt / response text | `ai_sessions.read.sensitive` | Tenant Admin · Detection Engineer |
+| Endpoint metadata (installed software, processes, env vars) | `endpoint_metadata.read.sensitive` | Tenant Admin · Detection Engineer |
+| Directory PII (name, email, phone, manager) | `directory_data.read.sensitive` | Tenant Admin · Detection Engineer |
+
+A query that **references** a sensitive column — in a result, a filter, a grouping, or a sort — without the matching permission is refused before it runs. A role that can't read a sensitive column never even sees it in the schema, so it can't build a query that touches one, and it can't probe values by guessing.
+
+<Warning>
+  AI prompt text is treated as the most sensitive surface in the product. Grant **Detection Engineer** to people who tune detections — not as a general power-user role.
+</Warning>
+
+<Note>
+  For the exact permission strings behind any capability not listed above, contact Origin support.
+</Note>

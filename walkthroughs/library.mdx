@@ -1,0 +1,86 @@
+---
+title: "Libraries"
+description: "The management interface for creating, saving, and editing kernels (saved queries), canvases (dashboard pages), and workflows."
+slug: "walkthroughs/library"
+sidebarTitle: "Libraries"
+---
+
+The **Library** is where the building blocks behind every saved view are managed — kernels, canvases, and workflows.
+
+![The Library showing kernel, canvas, and workflow counts with recent items](/images/product/library.jpg)
+
+The overview opens with a count of each:
+
+| Object | What it is |
+| --- | --- |
+| **Kernels** | Deterministic recipes — saved queries that always return the same shape of result |
+| **Canvases** | Multi-widget views assembled from kernels |
+| **Workflows** | Automations, created from the **\+** menu |
+
+## Kernels
+
+A kernel is a named, saved query. Each has a path-style name, a one-line description, and an attribution:
+
+```text
+/local-ai-summary
+Local AI on endpoints (30d) · built-in
+by Origin
+```
+
+Kernels shipped with the product are marked `built-in` and attributed `by Origin`. Ones your team writes carry your own attribution and can be edited.
+
+### Why deterministic matters
+
+The analytics graph answers free-form questions, and two similar questions can produce differently shaped answers. A kernel is pinned. That makes kernels the right tool when a number has to be comparable over time — a weekly report, a compliance figure, a widget on a shared dashboard — and the chat interface the right tool for open-ended investigation.
+
+<Tip>
+  A good working pattern: explore in the [Analytics Graph](/walkthroughs/dashboards) until you have a question worth tracking, then capture it as a kernel so the answer stays stable and can be dropped onto a canvas.
+</Tip>
+
+### Built-in kernels worth knowing
+
+| Kernel | Use it for |
+| --- | --- |
+| `/local-ai-summary` | Which endpoints are running local AI |
+| `/local-ai-detail` | The same, broken down per endpoint |
+| `/local-ai-evidence` | How that detection was actually made |
+| `/new-agent-surfaces` | Agent surfaces seen for the first time |
+| `/agent-surfaces` | The full set of agent surfaces (harnesses) in use |
+| `/model-mix` | Which models are carrying the work |
+| `/activity-summary` | A general activity rollup |
+
+## Canvases
+
+A canvas is a multi-widget view assembled from kernels. Each entry shows its name, description, kernel count, and age:
+
+```text
+/ai-usage-overview
+AI usage overview                    5 KERNELS · 223D AGO
+```
+
+That kernel count tells you how much is behind a canvas before you open it, and which kernels to check if a widget shows something unexpected.
+
+The same canvas is reachable from two places, and the difference matters:
+
+| Route | Behaviour |
+| --- | --- |
+| **Explore → Canvases** | Renders against whatever scope you have built |
+| **Analytics Graph → Dashboards** | Direct route, without setting up a scope first |
+
+<Note>
+  Not every canvas follows scope. Widgets reporting tenant-wide figures — **Token spend** is the built-in example — ignore the current scope by design.
+</Note>
+
+Before building a new one, check the built-in five — AI usage overview, Adoption & concentration, Shadow AI, Tools & resources, and Token spend already cover the most common governance, adoption, and cost questions.
+
+## Workflows
+
+Workflows are the automation layer. Origin ships none — a new tenant shows zero, with a prompt to create one from the **\+** menu.
+
+| Object | Role |
+| --- | --- |
+| **Kernel** | Produces a result |
+| **Canvas** | Presents results |
+| **Workflow** | Acts on results |
+
+If a kernel answers "how many endpoints are running local AI" and a canvas puts that on a page, a workflow is where recurring action on that answer belongs.

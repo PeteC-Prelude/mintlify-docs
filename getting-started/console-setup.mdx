@@ -1,0 +1,66 @@
+---
+title: "Origin Console Setup: The Settings Panel"
+sidebarTitle: "Console Setup"
+description: "An overview of the Origin Settings panel and its seven views — tenant settings, endpoint inventory, users, directory integrations, provisioning tokens, installers, and feedback."
+---
+
+Settings is where you configure your Origin tenant: fleet-wide agent behaviour, AI provider integrations, users and roles, provisioning tokens, and agent downloads. Sign in at [dashboard.originhq.com](https://dashboard.originhq.com/) and click **Settings** in the far-left rail.
+
+## The seven views
+
+The Settings panel is split into seven independent views, listed down the left of the panel. Each is its own screen with its own purpose — selecting one swaps the entire right-hand pane.
+
+<CardGroup cols={2}>
+  <Card title="Settings" icon="sliders" href="/getting-started/settings-view">
+    Rules and integrations — your access scope, fleet endpoint configuration, AI provider keys, password, and local browser data.
+  </Card>
+
+  <Card title="Endpoint Inventory" icon="server" href="/product/registered-endpoints">
+    Per-endpoint detail for every registered endpoint in the tenant.
+  </Card>
+
+  <Card title="User Management" icon="users" href="/getting-started/user-management">
+    Users and roles — invite team members and assign one of the built-in roles.
+  </Card>
+
+  <Card title="Directory Integrations" icon="id-card" href="/product/identity-integration">
+    Entra ID, Okta, and Google — connect an identity provider to attribute activity to people.
+  </Card>
+
+  <Card title="Provisioning Tokens" icon="key" href="/getting-started/provisioning-tokens">
+    Endpoint registration — create and revoke the tokens agents use to join your tenant.
+  </Card>
+
+  <Card title="Installers" icon="download" href="/getting-started/installers">
+    Agent downloads — every published macOS and Windows agent build, with checksums.
+  </Card>
+
+  <Card title="Send Feedback" icon="message" href="/kb/report-issues">
+    Report a bug or request a feature directly from the console.
+  </Card>
+</CardGroup>
+
+## Setup order
+
+If you are configuring a new tenant, work through the views in this order:
+
+<Steps>
+  <Step title="Invite your team">
+    Add users and assign roles under **User Management**. See [User Management](/getting-started/user-management).
+  </Step>
+  <Step title="Connect your identity provider">
+    Set up **Directory Integrations** so users and AI activity are attributed to real people. See [Directory Integrations](/product/identity-integration).
+  </Step>
+  <Step title="Configure fleet settings">
+    Set the OTLP collector port and tray-icon visibility under **Settings**, before agents are deployed. See [Settings](/getting-started/settings-view).
+  </Step>
+  <Step title="Connect AI providers">
+    Add the Anthropic Compliance API key and enable Microsoft 365 Copilot capture under **Settings**. See [AI Provider Support](/getting-started/ai-providers).
+  </Step>
+  <Step title="Create a provisioning token">
+    Generate the token your agents will register with. See [Provisioning Tokens](/getting-started/provisioning-tokens).
+  </Step>
+  <Step title="Download and deploy the agent">
+    Grab the installer for each platform and roll it out. See [Installers](/getting-started/installers) and [Agent Overview](/getting-started/agent-overview).
+  </Step>
+</Steps>

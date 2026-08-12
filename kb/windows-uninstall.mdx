@@ -1,0 +1,35 @@
+---
+title: "How to Fully Uninstall the Origin Agent from Windows"
+sidebarTitle: "Windows Uninstall"
+description: "Remove the Origin agent from Windows using msiexec, then manually delete the Origin data folder at C:\\ProgramData\\Origin to fully clean up the endpoint."
+---
+
+Uninstalling the Origin agent on Windows is a two-step process: first remove the agent using `msiexec.exe`, then manually delete the data folder that the uninstaller leaves behind.
+
+## Step 1 — Remove the agent with msiexec
+
+Run the following command in an elevated Command Prompt or PowerShell session, replacing `x.y.z` with the version number of the MSI used to install the agent. The installer filename follows the pattern `origin-installer-<version>-windows-x64.msi`.
+
+```bat
+msiexec.exe /X origin-installer-x.y.z-windows-x64.msi /quiet /norestart
+```
+
+Wait for the command to complete before proceeding.
+
+## Step 2 — Delete the Origin data folder
+
+The uninstaller does not remove the Origin data directory. After the uninstall completes, delete the following folder manually to fully clean up the endpoint:
+
+```
+C:\ProgramData\Origin
+```
+
+You can delete this folder in File Explorer or using an elevated PowerShell session:
+
+```powershell
+Remove-Item -Recurse -Force "C:\ProgramData\Origin"
+```
+
+<Tip>
+After uninstalling, the endpoint will stop appearing as active in the Origin console. If you want to confirm removal immediately, check the **Registered Endpoints** list — the endpoint's status will stop updating once the agent is no longer running.
+</Tip>

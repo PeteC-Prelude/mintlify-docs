@@ -1,0 +1,42 @@
+---
+title: "AI Provider Support: Supported Tools and Capture Methods"
+sidebarTitle: "AI Provider Support"
+description: "Which AI applications Origin captures, how each one is captured — OpenTelemetry, application hooks, or API integration — and where to set up the API-based integrations."
+icon: "plug"
+---
+
+Origin's supported applications are captured using three integration methods — **OpenTelemetry**, **application hooks**, and **API integration**.
+
+In the tables below:
+
+- The **Endpoint** column lists applications captured on the endpoint, via OpenTelemetry and application hooks. These need the Origin agent installed on the device, and nothing else.
+- The **API** column lists applications captured through API integration. These are read from the provider's cloud, so they cover activity on devices that aren't running the agent — but each one needs a one-time setup in **Settings**.
+
+## Application support
+
+| Provider | Endpoint | API |
+| --- | --- | --- |
+| **Anthropic** | Claude Code (CLI), Claude Code (Desktop), Claude Cowork | Browser (claude.ai), Claude Desktop Chat |
+| **OpenAI** | Codex CLI, ChatGPT Desktop (Chat, Work, Codex) | — |
+| **Microsoft** | GitHub Copilot CLI | M365 Office Applications, M365 Copilot, copilot.microsoft.com |
+| **Cursor** | Cursor desktop | — |
+
+## Set up the API integrations
+
+Endpoint capture works as soon as the agent is installed. The API-based integrations each need to be connected once from the Origin dashboard.
+
+<CardGroup cols={2}>
+  <Card title="Anthropic Enterprise" icon="comment" href="/product/claude-enterprise">
+    Connect your Claude Enterprise account through Anthropic's Compliance API to pull `claude.ai` and Claude Desktop activity, including from endpoints that aren't running the agent.
+  </Card>
+
+  <Card title="Microsoft 365 Copilot" icon="microsoft" href="/getting-started/microsoft-365-copilot">
+    Capture Copilot prompts and responses across Word, Excel, Outlook, Teams, and Copilot Chat by reading Microsoft's own cloud APIs. Requires the Entra ID directory integration.
+  </Card>
+</CardGroup>
+
+## AI tools not on this list
+
+Because Origin captures at the application layer rather than by matching network traffic, support for an application depends on that application exposing telemetry Origin can collect — an OpenTelemetry exporter, or a surface an application-level hook can attach to. Coverage is added per application rather than configured per domain.
+
+If your organization depends on an AI tool that isn't listed above, contact Origin support with the application name and how your teams use it.

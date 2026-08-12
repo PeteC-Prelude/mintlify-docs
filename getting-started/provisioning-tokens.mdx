@@ -1,0 +1,90 @@
+---
+title: "Create and Manage Origin Agent Provisioning Tokens"
+sidebarTitle: "Provisioning Tokens"
+description: "Create provisioning tokens in the Origin console to authorize agent installations. Tokens expire and carry a use limit, and can be revoked at any time."
+---
+
+Every Origin agent installation requires a provisioning token to register itself with your tenant. Without a valid token, an installed agent cannot connect to Origin or begin reporting telemetry. You create and manage tokens from **Settings → Provisioning Tokens** at [dashboard.originhq.com](https://dashboard.originhq.com/).
+
+## What is a provisioning token?
+
+A provisioning token is a signed JWT that proves to the Origin backend that an agent installation is authorized to register under your tenant. Think of it as the agent's enrollment credential. You supply it once during installation — interactively when running the installer manually, or silently when deploying via MDM. After the agent has registered, the token is no longer needed for that endpoint's ongoing operation.
+
+<Note>
+  One token can register **several** endpoints, but not unlimited ones. Each token carries a use limit and an expiry — see below. Many organizations create one token per deployment wave so a batch can be revoked independently.
+</Note>
+
+## The token list
+
+| Column | Description |
+| --- | --- |
+| **Status** | `Active` or `Revoked` |
+| **Created** | When the token was created |
+| **Expires** | When the token stops being valid |
+| **Used** | Registrations consumed against the token's limit, shown as `used / limit` |
+| **Created by** | The user who created it |
+| **Token ID** | The token's unique identifier |
+
+<Warning>
+  **Tokens expire and are use-limited.** A token shows an explicit expiry date and a `used / limit` count — for example `1 / 10`. Once either the expiry passes or the limit is reached, that token can no longer register new endpoints and your deployment will start failing.
+
+  Check both before a large rollout, and confirm the limit is high enough for the number of endpoints in the wave.
+</Warning>
+
+Use **Columns** to change which columns are visible, and the search box to filter the list.
+
+## Creating a token
+
+<Steps>
+  <Step title="Open Settings">
+    Sign in at [dashboard.originhq.com](https://dashboard.originhq.com/) and click **Settings** in the far-left rail.
+  </Step>
+  <Step title="Navigate to Provisioning Tokens">
+    Select **Provisioning Tokens** from the Settings panel.
+  </Step>
+  <Step title="Create the token">
+    Click **Create token**.
+  </Step>
+  <Step title="Copy and securely store the token">
+    Copy the token value as soon as it appears and store it in your organization's secrets manager, MDM configuration store, or credential vault.
+  </Step>
+</Steps>
+
+## Using the token during installation
+
+How you supply the token depends on your deployment method.
+
+### Manual installation
+
+When you run the installer interactively on a macOS or Windows endpoint, the installer prompts you for the provisioning token. Paste the value you copied from the console and complete the installation.
+
+### MDM deployment
+
+For large-scale deployments, your MDM injects the token silently as part of the install script or configuration profile.
+
+- **Windows** — passed as an MSI property: `PROVISIONING_JWT=<your-token>`
+- **macOS** — staged to a file the package's postinstall reads, so no user interaction is required
+
+See the [MDM Deployment guides](/getting-started/mdm-overview) for platform-specific configuration, and [Windows Install](/getting-started/windows-installation) for the full `msiexec` syntax.
+
+## Revoking a token
+
+Find the token in the list and click **Revoke** on its row. The token is invalidated immediately and can no longer register new endpoints. Revoked tokens remain in the list with a `Revoked` status for audit purposes.
+
+<Note>
+  Revoking a token does **not** disconnect or deregister endpoints that already registered with it. It only prevents the token from being used to register _new_ endpoints. Existing enrolled endpoints continue to report telemetry normally.
+</Note>
+
+To rotate: create a replacement token, update your MDM configuration and deployment scripts to use the new value, test a deployment, then revoke the old token.
+
+## Security best practices
+
+<Warning>
+  Treat a provisioning token like a password. Anyone holding a valid, unexpired token with remaining uses can register new endpoints against your tenant.
+</Warning>
+
+- **Do not commit tokens to source control.** Even in private repositories, secrets in version history are a common source of credential leaks. Use environment variables or a secrets manager.
+- **Scope tokens per deployment wave** so you can revoke one batch without disrupting others.
+- **Limit distribution.** Store the value in your MDM's secure parameter store rather than in plain-text scripts.
+- **Revoke tokens you no longer need**, rather than letting them sit until expiry.
+- **Watch the `used / limit` count** on tokens backing an active rollout, so you notice before a wave starts failing.

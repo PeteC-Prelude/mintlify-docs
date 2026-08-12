@@ -1,0 +1,45 @@
+---
+title: "Windows: Origin Agent Fails with Error -1073741515"
+sidebarTitle: "Windows VC++ Error"
+description: "Error -1073741515 (0xC0000135) means the Visual C++ Redistributable is missing. Install it before running the Origin agent installer on Windows."
+---
+
+When installing the Origin agent on Windows, you may see the installer exit with the following error:
+
+```
+Error: -1073741515 Undefined
+```
+
+This is the decimal form of `0xC0000135` (`STATUS_DLL_NOT_FOUND`). It means a required DLL — specifically one provided by the **Microsoft Visual C++ Redistributable** — is missing from the system. The Origin agent depends on the VC++ runtime, and if the redistributable is not present the agent's binaries cannot load and the installation fails.
+
+This error is most common on fresh OS images, minimal builds, and Windows Server Core installations where the VC++ runtime has not been included.
+
+## Resolution
+
+Install the latest Microsoft Visual C++ Redistributable **before** running the Origin agent installer.
+
+Download the latest supported package directly from Microsoft:
+
+- **Microsoft documentation:** [Latest supported Visual C++ Redistributable downloads](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
+
+Direct download links for the Visual Studio 2015–2022 runtime:
+
+| Architecture | Download |
+|---|---|
+| x64 | [vc\_redist.x64.exe](https://aka.ms/vs/17/release/vc_redist.x64.exe) |
+| x86 | [vc\_redist.x86.exe](https://aka.ms/vs/17/release/vc_redist.x86.exe) |
+| ARM64 | [vc\_redist.arm64.exe](https://aka.ms/vs/17/release/vc_redist.arm64.exe) |
+
+<Note>
+Most Windows endpoints require the **x64** package. On ARM64 hardware (for example, Surface Pro X or Snapdragon-based devices), install the ARM64 package instead.
+</Note>
+
+After the VC++ Redistributable installs successfully, re-run the Origin agent installer. Installation should complete normally.
+
+## Fleet deployment — chain VC++ as a prerequisite
+
+For broad deployments via Intune, SCCM/MECM, or any other endpoint management platform, **chain or bundle the Visual C++ Redistributable as a prerequisite** so it is installed before the Origin agent. Doing so prevents this failure from occurring on endpoints where the runtime is not already present.
+
+<Tip>
+When deploying through Intune, configure the VC++ Redistributable as a dependency of the Origin agent app so that it is automatically installed first on any endpoint that does not already have it.
+</Tip>

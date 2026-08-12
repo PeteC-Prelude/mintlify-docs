@@ -1,0 +1,53 @@
+---
+title: "Origin Agent Prerequisites and Known Compatibility Issues"
+sidebarTitle: "Prerequisites"
+description: "Review network endpoints, VC++ requirements, and SASE and application control compatibility issues before deploying the Origin agent at scale."
+---
+
+Before you install the Origin agent, make sure each endpoint meets the requirements below and that your network and security policies do not silently interfere with agent operation. Addressing these prerequisites up front prevents the most common deployment failures.
+
+## Visual C\+\+ Redistributable
+
+The Origin agent requires **Microsoft Visual C\+\+ 2015–2022 Redistributable (x64) version 14.44** to be present on every Windows endpoint.
+
+| Installer type | Visual C\+\+ behavior |
+| --- | --- |
+| `.exe` | Silently installs the redistributable if it is not already present — no action needed |
+| `.msi` | Requires the redistributable to be pre-installed, or linked as a prerequisite in your deployment tool before the MSI runs |
+
+If you deploy via MDM or a software management platform using the MSI, ensure Microsoft Visual C\+\+ 2015–2022 Redistributable (x64) is pushed to endpoints as a dependency before the Origin MSI executes. Failure to do so will cause the installer to exit with error `-1073741515`.
+
+## Network Connectivity
+
+The Origin agent must be able to reach the following two endpoints over outbound HTTPS (port 443) from every managed host. These connections are required both during initial installation and for ongoing operation.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `https://registration.prod.originhq.com` | Agent registration and credential exchange |
+| `https://endpoint.prod.originhq.com` | Continuous telemetry and policy delivery |
+
+If your environment enforces an explicit proxy or firewall allowlist, add both hostnames before deploying the agent. You can verify reachability from an endpoint at any time — see [Troubleshooting Network Connectivity](/kb/network-connectivity) for platform-specific commands.
+
+## SASE and TLS-inspection compatibility
+
+Origin collects AI event data at the application layer — through each AI tool's OpenTelemetry exporter and through application-level hooks — so a SASE gateway sitting in front of your AI provider traffic does **not** affect capture. There is no need for a per-process or per-destination bypass rule for AI-bound flows.
+
+<Warning>
+  What a gateway _can_ break is the agent's own connection to Origin. Both `registration.prod.originhq.com` and `endpoint.prod.originhq.com` must be reachable on TCP 443 and **excluded from TLS/SSL inspection** — the agent validates the certificate it receives, so a gateway that re-signs the connection will cause registration and heartbeat to fail.
+
+  See [Network Connectivity](/kb/network-connectivity) for verification commands.
+</Warning>
+
+## OTLP collector port
+
+The agent runs a local OpenTelemetry collector on the endpoint's loopback interface, on port **4318** by default.
+
+<Warning>
+  If another process already owns that port — a corporate OTel collector such as Datadog, Alloy, or Dynatrace — that host will not capture AI telemetry until the conflict is cleared.
+
+  Either free the port or set a different **OTLP collector port** fleet-wide under **Settings → Settings**. Check for a conflict before a large rollout. See [Console Setup](/getting-started/console-setup).
+</Warning>
+
+## Application Control (Windows)
+
+Origin's Windows agent installs no kernel network driver, so there is nothing to exclude in Windows Defender Application Control (WDAC), AppLocker, or third-party equivalents.

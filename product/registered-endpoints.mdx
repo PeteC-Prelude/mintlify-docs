@@ -1,0 +1,42 @@
+---
+title: "Endpoint Inventory: View and Search All Registered Endpoints"
+sidebarTitle: "Endpoint Inventory"
+description: "View every device where the Origin agent has reported in — search and filter by hostname, user, AI tools, agent version, and hardware details."
+---
+
+The Endpoint Inventory is Origin's canonical list of every endpoint where the Origin agent has reported in. Each row represents one host and surfaces the key details you need to understand the device, its registered user, the AI tools installed on it, and the health of the Origin agent itself. Access the Endpoint Inventory by going to **Settings** in the main navigation and selecting **Endpoint Inventory**.
+
+## Search and Filtering
+
+The **Search** box at the top of the table filters results in real time as you type. Your search runs across multiple fields simultaneously, including hostname, agent version, registered user, model, operating system, and other endpoint attributes — so you do not need to know which column a value lives in before you start searching.
+
+A counter below the search box always shows how many endpoints are currently visible versus the full total (for example, _200 shown 270 total_), so you can immediately see whether any filters are narrowing your view.
+
+## Column Management
+
+Click the **COLUMNS** button in the top-right corner of the table to choose which columns are visible. The button label shows the current state — for example, **6/19** means 6 of 19 available columns are turned on. Toggle individual columns on or off to focus the table on the fields most relevant to your current task, whether that is auditing AI tool installations or checking agent version coverage.
+
+## Default Columns
+
+The table opens with six columns visible by default.
+
+| Column | Description |
+|---|---|
+| **Hostname** | The host's reported computer name |
+| **Last Seen** | Date and time the endpoint last checked in; the table sorts by this column by default |
+| **Operating System** | The platform — macOS or Windows |
+| **Registered User** | The user account associated with this endpoint at the time of its last check-in |
+| **Agent Version** | The version of the Origin agent currently running on this host |
+| **Installed AI** | AI applications and tools that Origin has detected on the host |
+
+## Additional Columns
+
+Enabling additional columns via the **COLUMNS** toggle gives you access to a richer set of endpoint data, organized into three areas:
+
+- **Hardware details** — serial number, manufacturer, model, processor, memory, and drive size
+- **OS details** — operating system version and edition
+- **Agent integrity** — the executable SHA256 hash and watchdog version, useful for verifying that the agent binary has not been tampered with
+
+<Tip>
+  The table sorts by **Last Seen** by default, putting the most recently active endpoints at the top. Reverse the sort to bring the oldest check-ins to the surface and quickly identify stale or disconnected agents that may need attention.
+</Tip>

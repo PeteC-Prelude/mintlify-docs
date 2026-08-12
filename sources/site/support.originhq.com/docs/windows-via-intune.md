@@ -1,0 +1,128 @@
+# Source: https://support.originhq.com/docs/windows-via-intune
+
+A step-by-step walkthrough for packaging and pushing the Origin Agent to managed Windows endpoints.
+
+## 
+
+Prerequisites — Before you start
+
+Confirm the following before proceeding:
+
+- **Intune admin role** (or a scope that permits app creation and assignment).
+- **A valid Origin provisioning JWT** (install token) — obtain from the Origin console under **Settings → Installers**.
+- **An Entra ID security group** scoped to your target devices.
+- **The Origin installer MSI** — download from the Origin console under **Settings → Installers**.
+
+> 📘
+> 
+> ### 
+> 
+> **Where to find it**
+> 
+> Both the installer binary and the provisioning JWT live in the same place in the Origin console: **Settings → Installers**. Download the MSI and copy the provisioning token from that screen before moving to Intune.
+
+## 
+
+Packaging — Upload the MSI to Intune
+
+Intune accepts the Origin installer as a Windows MSI line-of-business app — no wrapping or prep tool required. Intune auto-populates the product code, version, and basic detection rules from the MSI metadata.
+
+**Line-of-business app**: Upload the MSI directly to Intune. Detection, uninstall, and version tracking are handled automatically via the embedded product code.
+
+**Upload path**: Intune admin center → **Apps → Windows → Add → Line-of-business app** → upload `origin-installer-windows-x64.msi` directly.
+
+## 
+
+Configuration — Configure the app in Intune
+
+The wizard presents four tabs: **App information**, **Scope tags**, **Assignments**, and **Review + create**. Work through each tab in order.
+
+### 
+
+1\. App information
+
+Fill in the fields as shown below. Fields not listed here can remain at their defaults.
+
+| Field | Value |
+| --- | --- |
+| Select file | `origin-installer-windows-x64.msi` |
+| Name | Origin Observability Agent |
+| Description | Origin Observability Agent |
+| Publisher | Origin |
+| App install context | Device |
+| Ignore app version | No |
+| Command-line arguments | `PROVISIONING_JWT="install_token_here"` |
+| Optional command-line arguments\* requires configuration change by Origin TAM | `INSTALL_WINDIVERT=0` |
+| Category | No Category |
+| Show as featured app | No |
+
+> 📘
+> 
+> ### 
+> 
+> **Command-line argument note**
+> 
+> Replace `install_token_here` with the JWT from **Settings → Installers** in the Origin console — the same screen where you downloaded the MSI. Keep the quotes around the token value. Do not include `msiexec` or `/qn`; Intune constructs the full install command automatically.
+
+### 
+
+2\. Scope tags
+
+| Field | Value |
+| --- | --- |
+| Scope tags | Default |
+
+### 
+
+3\. Assignments
+
+| Group mode | Group | End user notifications | Availability | Deadline | Restart grace period |
+| --- | --- | --- | --- | --- | --- |
+| Required → Included | Your target device group | Show all toast notifications | As soon as possible | As soon as possible | Disabled |
+
+> 📘
+> 
+> ### 
+> 
+> **Rollout hygiene**
+> 
+> Start with a small pilot group (2–5 test devices), validate registration, then broaden to your full target group.
+
+**Note:** Required will force the Origin agent to install on any targeted system. If you'd like to make Origin available via Company Portal assign your group instead under "Available for enrolled devices" and add users (not computers). This will make the Origin app available in Company Portal after targeted users authenticate in Company Portal
+
+ 
+
+### 
+
+4\. Review + create
+
+Review all settings, then click **Create**. Intune will process the MSI and make the app available for device assignment. Processing typically takes a few minutes.
+
+## 
+
+Monitoring and troubleshooting
+
+### 
+
+Post-deployment checks
+
+1. **Intune admin center → the app → Device install status.** Review successes, failures, and pending counts.
+2. **On an endpoint, tail the IME log:** `%ProgramData%\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log`
+3. **Review the Origin install log on the endpoint:** `C:\ProgramData\Origin\Agent\Logs\install.log`
+4. **Confirm the Origin service is running:** `Get-Service -Name Origin*` in PowerShell.
+5. **Verify backend registration** in the Origin console — the endpoint should appear with a recent heartbeat.
+
+### 
+
+Common install failures
+
+| Code / Symptom | Likely Cause | Where to Look |
+| --- | --- | --- |
+| `1603` | Generic MSI failure | IME log on endpoint; MSI verbose log |
+| `0x87D1041C` | Detection rule didn't match post-install | Verify the detection path exists after a manual test install |
+| Installer returns 0, agent never registers | Network-layer interception by another endpoint agent (e.g. Netskope WFP/TUN) | Origin-side logs, WinDivert capture status, vendor support channel |
+| Token rejected | Expired or malformed JWT | Re-issue from Origin console; confirm copy/paste didn't truncate or add whitespace |
+
+ 
+
+Copy Page

@@ -1,0 +1,89 @@
+---
+title: "Origin Agent Network Connectivity Requirements and Tests"
+sidebarTitle: "Network Connectivity"
+description: "The Origin agent needs outbound HTTPS access to two endpoints. Verify connectivity on Windows and macOS and learn what to do if registration fails."
+---
+
+The Origin agent depends on outbound access to two Prelude-hosted endpoints over standard HTTPS on TCP port 443. You must verify reachability to both endpoints before deploying the agent — if either is unreachable at install time, the installation will fail, and if the steady-state endpoint becomes blocked later, telemetry will stop flowing to the Origin console.
+
+## Required endpoints
+
+| Endpoint | Used during | Purpose |
+|---|---|---|
+| `registration.prod.originhq.com` | Installation | Endpoint registration. The installer exchanges the provisioning token for the agent's unique client certificate. Reached once, at install time. |
+| `endpoint.prod.originhq.com` | Ongoing operation | The agent's steady-state connection. Used for heartbeat, configuration retrieval, and reporting of observed AI activity. |
+
+<Warning>
+**Web proxy or SASE gateway in the path?** Both hostnames must be allowed on TCP 443 and must be **excluded from TLS/SSL inspection**. The agent validates the certificate it receives, so a gateway that re-signs the connection will cause registration and heartbeat to fail even if the TCP port is open.
+</Warning>
+
+## Verifying connectivity
+
+Run these checks on the target endpoint before installation. A successful TCP connection on port 443 is the primary signal — both endpoints speak gRPC/HTTPS rather than serving a web page, so an HTTP error returned by a browser is expected and is not itself a failure.
+
+<Tabs>
+  <Tab title="Windows">
+    Run the following in an elevated PowerShell session. The commands confirm the endpoint can open a TCP connection to each Prelude host on port 443.
+
+    ```powershell
+    Test-NetConnection registration.prod.originhq.com -Port 443
+    Test-NetConnection endpoint.prod.originhq.com -Port 443
+    ```
+
+    <Note>
+    **Expected output:** For both commands, `TcpTestSucceeded` should report `True`. A populated `RemoteAddress` also confirms the hostname resolved in DNS.
+    </Note>
+
+    To additionally confirm that the TLS handshake completes end-to-end — useful when a proxy sits in the path — run:
+
+    ```powershell
+    curl.exe -sv https://registration.prod.originhq.com 2>&1 | Select-String "Connected|SSL|TLS|certificate"
+    ```
+
+    A clean handshake shows the connection being established and the TLS certificate being presented without error.
+  </Tab>
+  <Tab title="macOS">
+    Run the following in Terminal. The `nc` commands test TCP reachability to each Prelude host on port 443.
+
+    ```bash
+    nc -vz registration.prod.originhq.com 443
+    nc -vz endpoint.prod.originhq.com 443
+    ```
+
+    <Note>
+    **Expected output:** Each command should report `Connection to ... port 443 [tcp/https] succeeded!`
+    </Note>
+
+    To confirm the TLS handshake completes — and to see whether a proxy is intercepting the connection — run:
+
+    ```bash
+    curl -sv https://registration.prod.originhq.com 2>&1 | grep -iE "connected|SSL|TLS|certificate"
+    ```
+
+    If DNS resolution itself is in question, confirm that both hostnames resolve before testing the TCP connection:
+
+    ```bash
+    dig +short registration.prod.originhq.com
+    dig +short endpoint.prod.originhq.com
+    ```
+  </Tab>
+</Tabs>
+
+## If connectivity is unavailable
+
+Installation runs in two phases. The first phase — copying files and registering the agent's service or daemon — does not require network access. The second phase, backend registration against `registration.prod.originhq.com`, does. When that endpoint is unreachable, the install fails and does not complete successfully.
+
+### What the failure looks like
+
+- **Windows:** The MSI's final registration step runs during `InstallFinalize`. If it cannot reach the registration endpoint, it returns a non-zero result and the installer reports a failed installation. Under Intune, this surfaces as a failed app installation.
+- **macOS:** The `.pkg` postinstall script performs registration. If the endpoint is unreachable, the postinstall step fails and the package install reports failure.
+
+In both cases the agent never receives its client certificate, so it cannot authenticate to Prelude even if connectivity is restored later. You must re-run the installer once the endpoint is reachable.
+
+### If registration succeeds but the steady-state endpoint is later blocked
+
+If `registration.prod.originhq.com` was reachable at install time but `endpoint.prod.originhq.com` is later blocked — for example by a subsequent firewall or proxy change — the agent stays installed and registered but cannot send heartbeats, retrieve configuration, or report AI activity. In the Origin console the endpoint will show a stale or missing **last seen** time and will report no telemetry.
+
+<Tip>
+To avoid both failure modes, verify that both endpoints are reachable using the checks above before deploying the agent at scale.
+</Tip>

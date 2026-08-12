@@ -1,0 +1,155 @@
+---
+title: "Verify the Origin Agent Is Running and Capturing AI"
+sidebarTitle: "Verify Installation"
+description: "Confirm the Origin agent is installed, healthy, and capturing AI activity on macOS and Windows using tray diagnostics, service checks, and test prompts."
+---
+
+This document details the steps to confirm the Origin Observability Agent is installed, healthy and capturing AI activity on macOS and Windows Endpoints.
+
+## Contents
+
+1. [UI and Diagnostic Report](#1-ui-and-diagnostic-report)
+2. [Verify Services and Processes](#2-verify-services-and-processes)
+3. [Generate Test Activity](#3-generate-test-activity)
+4. [Verify activity in the Origin Platform](#4-verify-activity-in-the-origin-platform)
+
+## 1. UI and Diagnostic Report
+
+The Origin Agent runs a small UI accessible from the **system tray** (Windows) or **menu bar** (macOS). The icon color is the fastest health check:
+
+| Icon | Status |
+| --- | --- |
+| **Green** | Healthy — agent running, registered, capturing |
+| **Yellow** | Degraded — running but one or more checks are failing |
+| **Red** | Error — agent stopped or unregistered |
+
+Click the icon to open the menu. From here:
+
+- **Diagnostic Report** — runs a full self-test (registration, mTLS credentials, backend reachability, entitlements). Every line should read **OK**.
+- **Open Log Folder** — opens the runtime log directory:
+  - Windows: `C:\ProgramData\Origin\Agent\Logs\`
+  - macOS: `/Library/Origin/logs/`
+
+If the icon is green and the Diagnostic Report comes back clean, the agent is healthy locally.
+
+## 2. Verify Services and Processes
+
+Both the **Origin Agent** and the **Origin Watchdog** must be running. The watchdog starts at boot and brings up the agent.
+
+### Windows (elevated PowerShell)
+
+```powershell
+Get-Service OriginWatchdog, OriginAgent
+```
+
+Both should report **Running**.
+
+### macOS
+
+```bash
+sudo launchctl list | grep origin
+```
+
+Two entries should return: `com.origin.watchdog` and `com.origin.agent`, each with a non-zero PID.
+
+### Cross-check in the Origin Platform
+
+Sign in to the **Origin Platform**, open the **Registered Endpoints** view, and confirm your endpoint shows a recent "Snapshot Time". If the endpoint is present here it has registered successfully with the Origin Platform.
+
+## 3. Generate Test Activity
+
+Origin captures AI activity by three different methods, and each has to be tested separately — a passing test in one track says nothing about the others. Run the track that matches what you are verifying, or all three for a full check.
+
+| Track | What it proves | Requires |
+| --- | --- | --- |
+| **3.1 Agent capture** | The agent's OpenTelemetry collector and application hooks are working **on this endpoint** | Origin agent installed |
+| **3.2 Anthropic API integration** | Claude chat activity is flowing from Anthropic's Compliance API | Compliance Access Key configured in Settings |
+| **3.3 Microsoft 365 Copilot** | Copilot activity is flowing from Microsoft's cloud APIs | Entra ID directory connected and Copilot capture enabled |
+
+<Tip>
+  Embed a unique token in each test prompt — e.g. `ORIGIN-VERIFY-<date>` or a unique UUID — to make the prompts trivially searchable.
+</Tip>
+
+### Sample prompts
+
+A few industry-recognized prompts that exercise different capture archetypes. Use these in any of the tracks below:
+
+- **Summarization** — _"`ORIGIN-VERIFY-20260513` — summarize the NIST AI Risk Management Framework (AI RMF 1.0) in three bullets."_
+- **Code generation** — _"`ORIGIN-VERIFY-20260513` — write a Python function that validates an IPv4 CIDR string."_
+- **Rewrite / tone shift** — _"`ORIGIN-VERIFY-20260513` — rewrite this for a non-technical executive: \[paste a short paragraph\]."_
+- **Open Q&A** — _"`ORIGIN-VERIFY-20260513` — list the OWASP Top 10 for LLM Applications."_
+- **Data analysis** — _"`ORIGIN-VERIFY-20260513` — given this CSV: \[paste 5–10 rows\], identify outliers and explain your reasoning."_
+
+### 3.1 Agent capture — OpenTelemetry and application hooks
+
+These applications are captured locally by the agent on the endpoint. No tenant-level integration is involved, so this is the only track that proves the install you just performed is working.
+
+Pick **one or two** of the following that are available on the verified endpoint:
+
+<Tabs>
+  <Tab title="Claude Code">
+    1. Open **Claude Code** — the CLI or the desktop app — on the verified endpoint.
+    2. Send a verification prompt from the list above.
+    3. Send a follow-up to generate a multi-turn session.
+  </Tab>
+  <Tab title="Claude Cowork">
+    1. Open **Claude Cowork** on the verified endpoint.
+    2. Send a verification prompt from the list above.
+    3. Send a follow-up to generate a multi-turn session.
+  </Tab>
+  <Tab title="ChatGPT Desktop">
+    1. Open the **ChatGPT desktop app** on the verified endpoint. Chat, Work, and Codex surfaces are all captured.
+    2. Send a verification prompt from the list above.
+    3. Send a follow-up to generate a multi-turn session.
+  </Tab>
+  <Tab title="Codex CLI">
+    1. Open a terminal on the verified endpoint and start the **Codex CLI**.
+    2. Send a verification prompt from the list above.
+    3. Send a follow-up to generate a multi-turn session.
+  </Tab>
+</Tabs>
+
+<Note>
+  Track 3.1 is the one that validates **this endpoint**. Tracks 3.2 and 3.3 read from the provider's cloud, so they report activity tenant-wide — including from devices with no agent installed — and a pass there does not mean the local agent is capturing.
+</Note>
+
+### 3.2 Anthropic API integration — Claude chat
+
+Claude chat activity is not captured on the endpoint. It is pulled from Anthropic's Compliance API and covers both surfaces:
+
+1. **Browser** — sign in to [claude.ai](https://claude.ai), send a verification prompt, then send two or three follow-ups to populate a meaningful session.
+2. **Claude Desktop Chat** — open the Claude desktop app, use the **Chat** surface, and send a verification prompt.
+
+<Note>
+  This track only produces results once the **Compliance Access Key** is configured under **Settings → Settings**. If it isn't, no claude.ai or Claude Desktop Chat activity will appear regardless of how many prompts you send. See [Claude Enterprise](/product/claude-enterprise).
+</Note>
+
+### 3.3 Microsoft 365 Copilot
+
+Copilot activity is read from Microsoft's own cloud APIs, not from the endpoint. Exercise one or more of the surfaces:
+
+1. **Office applications** — open Word, Excel, or PowerPoint, click the **Copilot** icon in the ribbon, send a verification prompt, then send a follow-up.
+2. **Copilot on the web** — browse to [copilot.microsoft.com](https://copilot.microsoft.com), sign in, send a verification prompt, and send a follow-up in the same conversation.
+3. **Teams and Outlook** — use the Copilot pane in either application and send a verification prompt.
+
+<Note>
+  This track requires the Entra ID directory integration to be connected, **Capture Copilot activity** enabled for that directory, and the readiness check passing. See [Microsoft 365 Copilot](/getting-started/microsoft-365-copilot).
+</Note>
+
+## 4. Verify activity in the Origin Platform
+
+Allow 1-2 minutes for events to propagate to the Platform, then:
+
+1. Open the **Origin Platform**.
+2. Locate the endpoint in All Endpoints view (this is the default landing page) and click it.
+3. Confirm the endpoint's activity bar at the top of the page now shows recent prompt activity — colored ticks indicating prompts captured within the test window.
+4. In the **Resource Overview** graph, confirm the applications you exercised appear as nodes:
+   - **Track 3.1** — Claude Code, Claude Cowork, ChatGPT, or Codex, depending on what you ran.
+   - **Track 3.2** — **Claude**.
+   - **Track 3.3** — **M365 Copilot**, and often **ChatGPT** as well (M365 Copilot's underlying model surface frequently appears under this label).
+
+<Note>
+  Activity from tracks 3.2 and 3.3 is sourced from the provider's cloud rather than the agent, so look for it across the tenant rather than expecting it on the endpoint you just verified.
+</Note>
+
+If the activity bar is empty after a few minutes, re-run the Diagnostic Report from the tray icon and check that every line reads **OK**, then consult the agent runtime logs. For the full matrix of which applications are captured by which method, see [AI Provider Support](/getting-started/ai-providers).

@@ -1,0 +1,92 @@
+---
+title: "Claude Enterprise Integration via Anthropic Compliance API"
+sidebarTitle: "Claude Enterprise"
+description: "Connect your Claude Enterprise account to Origin using the Anthropic Compliance API to pull claude.ai activity for endpoints without the Origin agent."
+icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiBmaWxsPSJoc2woMTQuOCwgNjMuMSUsIDU5LjYlKSI+PHBhdGggZD0ibTE5LjYgNjYuNSAxOS43LTExIC4zLTEtLjMtLjVoLTFsLTMuMy0uMi0xMS4yLS4zTDE0IDUzbC05LjUtLjUtMi40LS41TDAgNDlsLjItMS41IDItMS4zIDIuOS4yIDYuMy41IDkuNS42IDYuOS40TDM4IDQ5LjFoMS42bC4yLS43LS41LS40LS40LS40TDI5IDQxbC0xMC42LTctNS42LTQuMS0zLTItMS41LTItLjYtNC4yIDIuNy0zIDMuNy4zLjkuMiAzLjcgMi45IDggNi4xTDM3IDM2bDEuNSAxLjIuNi0uNC4xLS4zLS43LTEuMUwzMyAyNWwtNi0xMC40LTIuNy00LjMtLjctMi42Yy0uMy0xLS40LTItLjQtM2wzLTQuMkwyOCAwbDQuMi42TDMzLjggMmwyLjYgNiA0LjEgOS4zTDQ3IDI5LjlsMiAzLjggMSAzLjQuMyAxaC43di0uNWwuNS03LjIgMS04LjcgMS0xMS4yLjMtMy4yIDEuNi0zLjggMy0yTDYxIDIuNmwyIDIuOS0uMyAxLjgtMS4xIDcuN0w1OSAyNy4xbC0xLjUgOC4yaC45bDEtMS4xIDQuMS01LjQgNi45LTguNiAzLTMuNUw3NyAxM2wyLjMtMS44aDQuM2wzLjEgNC43LTEuNCA0LjktNC40IDUuNi0zLjcgNC43LTUuMyA3LjEtMy4yIDUuNy4zLjRoLjdsMTItMi42IDYuNC0xLjEgNy42LTEuMyAzLjUgMS42LjQgMS42LTEuNCAzLjQtOC4yIDItOS42IDItMTQuMyAzLjMtLjIuMS4yLjMgNi40LjYgMi44LjJoNi44bDEyLjYgMSAzLjMgMiAxLjkgMi43LS4zIDItNS4xIDIuNi02LjgtMS42LTE2LTMuOC01LjQtMS4zaC0uOHYuNGw0LjYgNC41IDguMyA3LjVMODkgODAuMWwuNSAyLjQtMS4zIDItMS40LS4yLTkuMi03LTMuNi0zLTgtNi44aC0uNXYuN2wxLjggMi43IDkuOCAxNC43LjUgNC41LS43IDEuNC0yLjYgMS0yLjctLjYtNS44LTgtNi05LTQuNy04LjItLjUuNC0yLjkgMzAuMi0xLjMgMS41LTMgMS4yLTIuNS0yLTEuNC0zIDEuNC02LjIgMS42LTggMS4zLTYuNCAxLjItNy45LjctMi42di0uMkg0OUw0MyA3MmwtOSAxMi4zLTcuMiA3LjYtMS43LjctMy0xLjUuMy0yLjhMMjQgODZsMTAtMTIuOCA2LTcuOSA0LTQuNi0uMS0uNWgtLjNMMTcuMiA3Ny40bC00LjcuNi0yLTIgLjItMyAxLTEgOC01LjVaIj48L3BhdGg+PC9zdmc+"
+---
+
+Origin connects to Claude Enterprise through Anthropic's Compliance API. It pulls your organization's Claude activity directly from Anthropic and lands it in the same context graph as everything Origin observes on the endpoint.
+
+## What it adds
+
+Origin's agent already captures Claude where it runs on an instrumented endpoint — including Claude Code, the desktop app, Cowork, and browser-based agents. The Compliance API covers the rest of the organization: `claude.ai` and Claude Desktop usage on endpoints that are not running the agent, plus organization-level activity such as sign-ins, admin actions, and configuration changes. Both feed the same record of AI work.
+
+With the key in place, Origin pulls Claude chats and messages, the files, projects, and artifacts attached to them, and activity feed events. Each chat is attributed to the user who ran it and threaded into the same traces, analytics, and inventory as the rest of your AI activity, so Claude usage can be investigated alongside the endpoint record.
+
+## How it works
+
+The connector runs on its own once the key is saved. It reads Claude's activity feed about once a minute, picks up the chats that changed, and pulls their new messages. The first sync backfills roughly the last 30 days. There is nothing to export and no schedule to manage.
+
+The key is read-only. Origin reads from your Claude organization and does not write to it or delete anything.
+
+## Before you start
+
+Make sure you have the following before beginning setup:
+
+- A **Claude Enterprise plan** with the Compliance API available. The Compliance API is generally available on Claude Enterprise, except for Public Sector organizations.
+- The **Primary Owner** of your Claude organization. Only the Primary Owner can enable the Compliance API and create access keys.
+- An **Origin admin**, who can save the key in the Origin dashboard.
+
+## Setup
+
+<Steps>
+  <Step title="Enable the Compliance API in Claude">
+    The Primary Owner performs this step once for the organization.
+
+    1. Sign in to [claude.ai](https://claude.ai) as the Primary Owner.
+    2. Open **Organization settings → API** ([claude.ai/admin-settings/api-access](https://claude.ai/admin-settings/api-access)).
+    3. Under **Compliance API**, click **Enable**.
+  </Step>
+
+  <Step title="Create a Compliance Access Key">
+    1. In claude.ai, go to **Settings → Data and Privacy → Compliance access keys**.
+    2. Click **Create key** and give it a name — for example, `Origin`.
+    3. Select these three scopes:
+       - `read:compliance_activities`
+       - `read:compliance_user_data`
+       - `read:compliance_org_data`
+    4. Click **Create** and copy the key immediately. It begins with `sk-ant-api01-`, and Claude shows it only once — store it somewhere safe before closing the dialog.
+
+    Origin uses all three scopes: **activities** to find what changed, **user data** to read chats and their files, and **org data** to attribute activity to the right people. Leave `delete:compliance_user_data` unselected — Origin does not use it.
+
+    <Warning>
+      Scopes are fixed once a key is created. If a required scope is missing, delete the key and create a new one with all three read scopes selected.
+    </Warning>
+  </Step>
+
+  <Step title="Save the key in Origin">
+    1. Sign in to the Origin dashboard at [dashboard.originhq.com](https://dashboard.originhq.com) as an admin.
+    2. Open **Settings → Integrations → Anthropic Compliance API key**.
+    3. Paste the key into the **Compliance Access Key** field.
+    4. Click **Save key**.
+
+    Origin stores the key encrypted and does not show it again. Once it is saved, the section reads **Configured** and reports the current sync status.
+  </Step>
+</Steps>
+
+## What to expect after connecting
+
+Origin begins pulling data within a few minutes of the key being saved. New Claude activity then flows continuously into your traces, analytics, and inventory alongside the endpoint record. No further setup is required.
+
+## Changing or removing the connection
+
+- **Rotate the key:** Create a new Compliance Access Key in claude.ai, then click **Replace key** in Origin and paste the new key.
+- **Disconnect:** Click **Remove** in Origin. New activity stops syncing; data already in Origin is unaffected.
+- **Revoke access:** Delete the key in claude.ai under **Settings → Data and Privacy → Compliance access keys**. This immediately stops all syncing.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Resolution |
+|---|---|---|
+| Still reads "Not configured" after saving | The field was empty or the save did not complete | Paste the key again and click **Save key**. |
+| Sync reports a 403 error | The Compliance API is not enabled, or the key is missing a scope | Confirm the Compliance API is enabled in claude.ai and the key holds all three read scopes. If a scope is missing, delete the key and create a new one. |
+| No Claude activity appears | The key is valid but there is no recent Claude usage, or none within the backfill window | Use Claude, then wait for the next sync cycle. |
+| Sync stops after previously working | The key was deleted or revoked in claude.ai | Create a new key in claude.ai and click **Replace key** in Origin. |
+
+## What Origin accesses
+
+Origin's access is intentionally narrow and read-only:
+
+- **Read access** to your Claude organization through the three scopes listed above: chats, messages, files, projects, artifacts, and activity feed events.
+- **No delete access**, and no ability to change anything in your Claude organization.
+- The Compliance Access Key is **stored encrypted** in Origin and is never shown again after you save it.

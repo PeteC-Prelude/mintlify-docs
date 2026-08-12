@@ -1,0 +1,220 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "OriginHQ",
+  "theme": "luma",
+  "favicon": "https://media.brand.dev/2acb6583-143c-4634-ba73-4e356696f4d8.png",
+  "colors": {
+    "primary": "#1B4FCC",
+    "light": "#4B7BF5",
+    "dark": "#1B4FCC"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "getting-started/what-is-origin",
+              "getting-started/key-concepts"
+            ]
+          },
+          {
+            "group": "Setup and Configuration",
+            "pages": [
+              "getting-started/console-setup",
+              "getting-started/settings-view",
+              "product/registered-endpoints",
+              "getting-started/user-management",
+              "product/role-based-access-control",
+              "product/identity-integration",
+              "product/entra-id-setup",
+              "getting-started/provisioning-tokens",
+              "getting-started/installers",
+              "kb/report-issues"
+            ]
+          },
+          {
+            "group": "AI Provider Integration",
+            "pages": [
+              "getting-started/ai-providers",
+              "product/claude-enterprise",
+              "getting-started/microsoft-365-copilot"
+            ]
+          },
+          {
+            "group": "Agent Installation",
+            "pages": [
+              "getting-started/agent-overview",
+              "getting-started/macos-installation",
+              "getting-started/windows-installation",
+              "getting-started/verifying-installation"
+            ]
+          },
+          {
+            "group": "MDM Deployment",
+            "pages": [
+              "getting-started/mdm-overview",
+              "getting-started/macos-via-jamf",
+              "getting-started/macos-via-intune",
+              "getting-started/windows-via-intune",
+              "getting-started/macos-via-tanium"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Product Walkthroughs",
+        "pages": [
+          "walkthroughs/how-origin-is-organized",
+          "walkthroughs/dashboards",
+          "walkthroughs/explore",
+          "walkthroughs/library"
+        ]
+      },
+      {
+        "tab": "Knowledge Base",
+        "groups": [
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "kb/agent-installation-issues",
+              "kb/network-connectivity",
+              "kb/macos-no-ai-events",
+              "kb/windows-vc-error",
+              "kb/macos-uninstall",
+              "kb/windows-uninstall"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "kb/prerequisites"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "background": {
+    "color": {
+      "dark": "#0A0A0F"
+    }
+  },
+  "logo": {
+    "light": "/images/origin-wordmark-light.svg",
+    "dark": "/images/origin-wordmark-dark.svg"
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/getting-started/what-is-origin",
+      "permanent": false
+    },
+    {
+      "source": "/product/endpoint-explorer",
+      "destination": "/walkthroughs/overview",
+      "permanent": true
+    },
+    {
+      "source": "/product/activity-clustering",
+      "destination": "/walkthroughs/entities",
+      "permanent": true
+    },
+    {
+      "source": "/product/chat-interface",
+      "destination": "/walkthroughs/ask-origin",
+      "permanent": true
+    },
+    {
+      "source": "/product/skills",
+      "destination": "/walkthroughs/entities",
+      "permanent": true
+    },
+    {
+      "source": "/product/supported-ai-providers",
+      "destination": "/getting-started/ai-providers",
+      "permanent": true
+    },
+    {
+      "source": "/product/mcp-server",
+      "destination": "/walkthroughs/ask-origin",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/inventory",
+      "destination": "/walkthroughs/anatomy",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/agents-and-sessions",
+      "destination": "/walkthroughs/entities",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/settings-and-configuration",
+      "destination": "/getting-started/console-setup",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs",
+      "destination": "/walkthroughs/how-origin-is-organized",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/overview",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/x-ray",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/anatomy",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/canvases",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/scope-and-steering",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/entities",
+      "destination": "/walkthroughs/explore",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/ask-origin",
+      "destination": "/walkthroughs/dashboards",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/kernels",
+      "destination": "/walkthroughs/library",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/library-canvases",
+      "destination": "/walkthroughs/library",
+      "permanent": true
+    },
+    {
+      "source": "/walkthroughs/workflows",
+      "destination": "/walkthroughs/library",
+      "permanent": true
+    }
+  ],
+  "appearance": {
+    "default": "light",
+    "strict": false
+  }
+}

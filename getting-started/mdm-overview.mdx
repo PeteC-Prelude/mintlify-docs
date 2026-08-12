@@ -1,0 +1,38 @@
+---
+title: "Deploy the Origin Agent via MDM: Jamf, Intune, Tanium"
+sidebarTitle: "MDM Overview"
+description: "Push the Origin agent to your entire macOS or Windows fleet using Jamf Pro, Microsoft Intune, or Tanium — one configuration profile and a provisioning token."
+---
+
+The following MDM deployment methods have been tested and fully documented. Each method has its own page with detailed step-by-step instructions:
+
+1. [**Windows Origin Agent via Intune**](/getting-started/windows-via-intune)
+2. [**macOS Origin Agent via Intune**](/getting-started/macos-via-intune)
+3. [**macOS Origin Agent via Jamf**](/getting-started/macos-via-jamf)
+4. [**macOS Origin Agent via Tanium**](/getting-started/macos-via-tanium)
+
+## MDM Configuration Profile
+
+All three macOS deployment guides use the same privacy preferences (PPPC) profile. It pre-grants the Origin agent **Full Disk Access** and **Endpoint Security** access, so the agent registers silently with no user-facing permission dialogs.
+
+<Card title="origin-privacy.mobileconfig.txt" icon="download" href="/files/origin-privacy.mobileconfig.txt">
+  Privacy preferences (PPPC) profile — Team ID `D3C73MWD7Y`, bundle ID `com.origin.agent`. Deploy this before the Origin package installs.
+</Card>
+
+<Warning>
+  **Rename the file after downloading.** It is published with a `.txt` extension and must be saved as `origin-privacy.mobileconfig` before you upload it to your MDM. macOS and every MDM platform key off the `.mobileconfig` extension.
+
+  ```bash
+  mv origin-privacy.mobileconfig.txt origin-privacy.mobileconfig
+  ```
+</Warning>
+
+<Warning>
+  Upload the file to your MDM as a **raw `.mobileconfig`**. Do not recreate it in Jamf's, Intune's, or Tanium's built-in payload editor — they rewrite the XML and break the code requirement that makes the permission grants work.
+</Warning>
+
+The install script each guide needs is included inline on that guide's own page.
+
+<Note>
+  For manual installation instructions on macOS and Windows, refer to the [macOS Agent Installation](/getting-started/macos-installation) and [Windows Agent Installation](/getting-started/windows-installation) pages. MDM deployment is recommended for fleet-scale rollouts where per-endpoint manual installation is not practical.
+</Note>

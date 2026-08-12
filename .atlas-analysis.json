@@ -1,0 +1,130 @@
+{
+  "projectType": "saas",
+  "projectName": "OriginHQ",
+  "projectDescription": "Origin is an endpoint AI observability platform that inventories, monitors, and measures AI agent activity across an organization's fleet — giving security and IT teams complete visibility into who is using AI, how, and what data is being shared.",
+  "theme": "luma",
+  "primaryColor": "#7c7c7c",
+  "lightColor": "#070707",
+  "darkColor": "#c4c4c4",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Getting Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "getting-started/what-is-origin",
+              "getting-started/key-concepts"
+            ]
+          },
+          {
+            "group": "Console Setup",
+            "pages": [
+              "getting-started/console-setup",
+              "getting-started/user-management",
+              "getting-started/provisioning-tokens"
+            ]
+          },
+          {
+            "group": "Agent Installation",
+            "pages": [
+              "getting-started/agent-overview",
+              "getting-started/macos-installation",
+              "getting-started/windows-installation",
+              "getting-started/verifying-installation"
+            ]
+          },
+          {
+            "group": "MDM Deployment",
+            "pages": [
+              "getting-started/mdm-overview",
+              "getting-started/macos-via-jamf",
+              "getting-started/macos-via-intune",
+              "getting-started/windows-via-intune",
+              "getting-started/macos-via-tanium"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Product Guide",
+        "groups": [
+          {
+            "group": "Dashboard",
+            "pages": [
+              "product/endpoint-explorer",
+              "product/registered-endpoints",
+              "product/activity-clustering"
+            ]
+          },
+          {
+            "group": "AI Assistant",
+            "pages": [
+              "product/chat-interface",
+              "product/skills"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "product/supported-ai-providers",
+              "product/role-based-access-control",
+              "product/identity-integration",
+              "product/entra-id-setup",
+              "product/claude-enterprise",
+              "product/mcp-server"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Knowledge Base",
+        "groups": [
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "kb/agent-installation-issues",
+              "kb/network-connectivity",
+              "kb/macos-no-ai-events",
+              "kb/windows-vc-error",
+              "kb/macos-uninstall",
+              "kb/windows-uninstall"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "kb/prerequisites",
+              "kb/report-issues"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Endpoint AI agent inventory and visibility across Windows and macOS fleets",
+    "Real-time capture of AI prompts, sessions, and token usage across all major AI providers",
+    "Activity Clustering — semantic grouping of AI activity into named topic clusters",
+    "Endpoint Explorer dashboard with fleet-wide metrics, trace logs, and execution logs",
+    "Natural-language chat interface to query the analytics graph",
+    "Role-based access control with Admin and Member roles",
+    "Identity integration with Microsoft Entra ID, Google Workspace, and Okta",
+    "MDM deployment support for Jamf, Intune, and Tanium",
+    "Claude Enterprise integration via Anthropic Compliance API",
+    "MCP server for querying observability data from AI coding tools",
+    "Custom AI provider capture rules",
+    "Skills — uploadable behavioral units for automation"
+  ],
+  "publicApiSurface": [
+    "MCP tool: analytics_query",
+    "MCP tool: analytics_describe_schema",
+    "MCP endpoint: https://mcp.prod.originhq.com/mcp",
+    "Agent registration endpoint: https://registration.prod.originhq.com",
+    "Agent heartbeat endpoint: https://endpoint.prod.originhq.com",
+    "Windows silent install: msiexec /i origin-installer.msi /quiet PROVISIONING_JWT=<token>",
+    "macOS uninstall: sudo /Applications/Origin.app/Contents/Resources/uninstall.sh",
+    "Windows uninstall: msiexec.exe /X origin-installer.msi /quiet /norestart"
+  ]
+}

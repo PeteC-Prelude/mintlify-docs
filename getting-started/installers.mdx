@@ -1,0 +1,74 @@
+---
+title: "Download Origin Agent Installers"
+sidebarTitle: "Installers"
+description: "The Installers view lists every published Origin agent build for macOS and Windows, with format, version, size, and SHA256 checksum for verification."
+---
+
+The **Installers** view is where you download the Origin agent packages. Open it at **Settings → Installers** in the console.
+
+By default the view shows the **three latest builds** — one per platform and format. A counter above the table reads `3 latest` alongside the total number of published builds, and a **Show all versions** button expands the list to every build ever published. A search box filters on platform, architecture, format, version, or checksum.
+
+## What the table shows
+
+| Column | Description |
+| --- | --- |
+| **Platform** | macOS or Windows |
+| **Architecture** | Universal for macOS; x64 for Windows |
+| **Format** | PKG, MSI, or EXE |
+| **Version** | Agent version |
+| **Published** | Date and time the build was published |
+| **Size** | Download size |
+| **SHA256** | Digest for verifying the download |
+
+Each row has its own **Download** button.
+
+## Which package to use
+
+| Platform | Format | Use it for |
+| --- | --- | --- |
+| macOS | **PKG** | Every macOS install — manual and MDM alike. |
+| Windows | **MSI** | MDM and software-distribution tooling (Intune, SCCM). Requires the Visual C\+\+ redistributable already present. |
+| Windows | **EXE** | Ad-hoc and one-off installs. Detects and installs the Visual C\+\+ redistributable automatically. |
+
+See [Windows Install](/getting-started/windows-installation) for the difference in more detail, and [macOS Install](/getting-started/macos-installation) for the `.pkg` walkthrough.
+
+## Verifying a download
+
+The **SHA256** column carries the digest of each package. Compare it against the file you downloaded before deploying it to a fleet:
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    shasum -a 256 Origin.pkg
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```powershell
+    Get-FileHash -Algorithm SHA256 .\origin-installer-windows-x64.msi
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  **You also need a provisioning token.** Installers and Provisioning Tokens are two separate views. The package downloaded here cannot register an agent on its own — create a token under **Settings → Provisioning Tokens** first. See [Provisioning Tokens](/getting-started/provisioning-tokens).
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="macOS Install" icon="apple" href="/getting-started/macos-installation">
+    Run the `.pkg` installer and register the agent.
+  </Card>
+
+  <Card title="Windows Install" icon="windows" href="/getting-started/windows-installation">
+    Deploy the MSI silently with a provisioning JWT.
+  </Card>
+
+  <Card title="MDM Overview" icon="building" href="/getting-started/mdm-overview">
+    Push the agent fleet-wide via Jamf, Intune, or Tanium.
+  </Card>
+
+  <Card title="Provisioning Tokens" icon="key" href="/getting-started/provisioning-tokens">
+    Create the token each agent needs to register.
+  </Card>
+</CardGroup>

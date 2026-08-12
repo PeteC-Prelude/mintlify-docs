@@ -1,0 +1,39 @@
+---
+title: "Connect an Identity Provider to Origin for Directory Sync"
+sidebarTitle: "Directory Integrations"
+description: "Sync users, groups, group memberships, and device-to-user assignments from your identity provider into Origin's Directory Browser for richer context."
+---
+
+Connect Origin to your identity provider so that users, groups, group memberships, and device-to-user assignments stay in sync with your source of truth. Once an integration is connected, the synced data appears in the **Directory Browser** in your Origin dashboard, giving every investigator richer context when reviewing endpoint activity.
+
+## What Directory Integration Does
+
+After you connect a provider, Origin periodically pulls directory data and surfaces it throughout the console:
+
+- **Users** — every account in your directory, including display name, email, department, job title, and last sign-in time.
+- **Groups** — security groups, distribution lists, and Microsoft 365 groups, with direct memberships and nested sub-groups.
+- **Device-to-user assignments** — hardware serial numbers and assigned owners from your MDM or device management platform, used to correlate observed endpoints with real identities.
+
+All of this data is browsable in **Directory Browser**, and where serial numbers match endpoints already registered in Origin, you'll see an **Assigned identity** appear directly on the endpoint detail panel.
+
+## Supported Providers
+
+| Provider | Status | Notes |
+| --- | --- | --- |
+| **Microsoft Entra ID** | Available | Register an app, grant Graph permissions, connect from the dashboard. |
+| **Google ID** | Preview | — |
+| **Okta** | Preview | — |
+
+<CardGroup cols={3}>
+  <Card title="Microsoft Entra ID" icon="microsoft" href="/product/entra-id-setup">
+    Register an application in your Entra tenant, grant the required Microsoft Graph permissions, and connect the integration from the Origin dashboard. Full step-by-step guide available.
+  </Card>
+
+  <Card title="Google ID" icon="google">
+    **Preview.** Google Workspace directory integration is available in preview.
+  </Card>
+
+  <Card title="Okta" icon="lock">
+    **Preview.** Okta directory integration is available in preview.
+  </Card>
+</CardGroup>

@@ -1,0 +1,82 @@
+---
+title: "The Settings View: Fleet Configuration and Integrations"
+sidebarTitle: "Settings"
+description: "Configure your Origin tenant from the Settings view — access scope, fleet endpoint configuration, the OTLP collector port, AI provider integrations, your password, and local browser data."
+---
+
+The **Settings** view is the first entry in the Settings panel, covering rules and integrations. It is a single scrolling page of cards. Open it at **Settings → Settings** in the console.
+
+For the other six views in the panel, see [Console Setup](/getting-started/console-setup).
+
+## Identity — Your access
+
+The first card reports the scope of your own access, for example _"Covers the whole tenant · 98 endpoints."_
+
+<Note>
+  This card is informational. It describes your intended scope — it is not a filter on the data shown elsewhere in the console.
+</Note>
+
+## Fleet — Endpoint Configuration
+
+Agent settings pushed to every endpoint in the tenant. Changes apply on the next agent heartbeat, so you never need to touch individual machines.
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| **Hide system tray icon** | Off | Suppresses the tray process and removes the auto-start entry. |
+| **OTLP collector port** | 4318 | Loopback port the agent's AI-telemetry collector binds on each endpoint. Leave empty for the default. |
+
+### OTLP collector port
+
+Set this if your endpoints already run a corporate OTel collector — Datadog, Alloy, Dynatrace — on 4318.
+
+<Warning>
+  The port applies the next time each endpoint's agent restarts. Changing an already-configured port can briefly pause capture on macOS endpoints until each agent reconnects.
+
+  If the chosen port is already in use on a host, that host won't capture AI telemetry until the conflict is cleared — coordinate the port with whoever owns those endpoints.
+</Warning>
+
+The card shows a **Last saved** timestamp, and **Discard** / **Save** buttons. Changes are not pushed until you save.
+
+<Note>
+  Additional fleet configuration is available with the **AI Visibility** feature. If your tenant doesn't have it, the options above are the full set exposed in this card.
+</Note>
+
+## Integrations — Anthropic Compliance API key
+
+Lets Origin pull your organization's `claude.ai` and Claude Desktop chats through Anthropic's Compliance API, so they appear alongside your other captured prompts.
+
+Paste a Compliance Access Key — it begins with `sk-ant-api01-` and is created in claude.ai under Compliance Access Keys. The key is stored encrypted and never shown again after saving. Until one is added the card reads **Not configured**; once saved it reads **Configured — connected** and offers **Remove** and **Replace key**.
+
+For the full setup walkthrough, including the Claude-side steps and the scopes Origin needs, see [Claude Enterprise](/product/claude-enterprise).
+
+## Integrations — Microsoft 365 Copilot capture
+
+Pulls Microsoft 365 Copilot prompts and responses (Word, Excel, Outlook, Teams, Copilot Chat) into AI activity, attributed to each person.
+
+Copilot capture is enabled **per connected Microsoft Entra ID directory** — each appears as its own card — and needs no extra credentials beyond the directory integration's admin consent. A directory that hasn't finished connecting shows **Not connected** and cannot be enabled until you complete it under [Directory Integrations](/product/identity-integration).
+
+Once connected, each card carries a **Capture Copilot activity** toggle, a delivery mode, and a **Readiness** section with a **Check readiness** / **Re-check** button that makes live Microsoft API calls.
+
+<Note>
+  Turning the toggle on is not sufficient on its own. Capture stays blocked until the Microsoft-side prerequisites pass, so run the readiness check after enabling.
+</Note>
+
+For prerequisites, the APIs involved, and troubleshooting, see [Microsoft 365 Copilot](/getting-started/microsoft-365-copilot).
+
+## Account — Change Password
+
+Set a new password from the **Current password**, **New password**, and **Confirm new password** fields, then click **Update password**. New passwords must be at least 8 characters.
+
+<Note>
+  This only applies to local password accounts. Users who sign in via SSO / WorkOS manage credentials at their identity provider.
+</Note>
+
+## Local storage — Clear local data
+
+Wipes locally-cached data from the browser you're using, without signing you out. This affects that browser only; server-side state is unchanged. Each row has its own **Clear** button.
+
+| Item | What it clears |
+| --- | --- |
+| **Chat history** | Conversations and prompts saved in this browser. Local kernels, canvases, pins, and pending cloud-recovery data are preserved. |
+| **Workflows** | Workflow definitions and run history saved in this browser. |
+| **MCP credentials** | OAuth tokens and API keys for Linear, Notion, Zapier, and other MCP servers. |

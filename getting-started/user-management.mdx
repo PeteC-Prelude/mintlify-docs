@@ -1,0 +1,93 @@
+---
+title: "Invite Users and Assign Roles in the Origin Console"
+sidebarTitle: "User Management"
+description: "Invite team members to your Origin tenant from Settings → User Management and assign one of the eight built-in roles."
+---
+
+Origin ships eight built-in roles. This page lists what each role covers and how to invite people into your tenant.
+
+## The eight built-in roles
+
+| Role | Description |
+| --- | --- |
+| **Tenant Admin** | Full administrative access — can manage users, endpoints, integrations, and tenant settings. |
+| **SecOps** | SOC analyst — broad read access plus row-level analytics with prompt content stripped; no sensitive data. |
+| **Detection Engineer** | Detection content owner — read access including raw event and AI session content. |
+| **IT / Fleet Admin** | Fleet administrator — write access; no raw event content. |
+| **Viewer** | Auditor / read-only stakeholder. |
+| **Vendor Support** | External support engineer — fleet/operational health for troubleshooting; no monitored content. |
+| **Security Engineering** | Platform/integration engineer — manages integrations and platform config; no monitored-data read. |
+| **No Data Access** | Login and navigate only — holds no permissions; sees no tenant or operational data. |
+
+<Note>
+  For a row-by-row breakdown of what every role can reach — endpoints, event content, prompt text, analytics, directory data, signals, and administration — see [Access Control](/product/role-based-access-control).
+</Note>
+
+## Sensitive data is gated separately
+
+Every analytics column is classed **Default** or **Sensitive**. Default covers metadata — timestamps, model names, identifiers, counts, status. Sensitive covers anything that exposes private content in bulk, and reading it needs a dedicated permission on top of the role's normal read.
+
+| Sensitive surface | Permission | Held by |
+| --- | --- | --- |
+| Raw event payloads (command args, file content) | `events.read.sensitive` | Tenant Admin · Detection Engineer |
+| AI prompt / response text | `ai_sessions.read.sensitive` | Tenant Admin · Detection Engineer |
+| Endpoint metadata (installed software, processes, env vars) | `endpoint_metadata.read.sensitive` | Tenant Admin · Detection Engineer |
+| Directory PII (name, email, phone, manager) | `directory_data.read.sensitive` | Tenant Admin · Detection Engineer |
+
+A query that **references** a sensitive column — in a result, a filter, a grouping, or a sort — without the matching permission is refused before it runs. A role that can't read a sensitive column never even sees it in the schema, so it can't build a query that touches one, and it can't probe values by guessing.
+
+<Warning>
+  AI prompt text is treated as the most sensitive surface in the product. Grant **Detection Engineer** to people who tune detections — not as a general power-user role.
+</Warning>
+
+## Choosing a role
+
+<Tip>
+  Start from least privilege and add capability only where a person's job requires it.
+</Tip>
+
+- **Start from least privilege.** Give analysts **SecOps**; add **Detection Engineer** only for the people who genuinely need to read prompt and payload content.
+- **Viewer is read-only, not read-everything.** Auditors and execs see metadata, counts, and configuration — never sensitive content or raw rows.
+- **IT / Fleet Admin runs the fleet, not investigations.** It manages endpoints and provisioning but has no event or analytics access.
+- **Treat Tenant Admin like root.** It holds destructive operations and all sensitive content. Keep the holder count small.
+- **Use Vendor Support for outside help** that needs deployment health but must never see monitored content, and **No Data Access** for training accounts that should see nothing.
+
+## The User Management view
+
+Open **Settings → User Management** at [dashboard.originhq.com](https://dashboard.originhq.com/). The table lists every user in your tenant.
+
+| Column | Description |
+| --- | --- |
+| **Email** | The user's sign-in address |
+| **Name** | Display name |
+| **Role** | The role currently assigned |
+| **Membership** | The user's organization membership identifier |
+
+Use the search box to filter by email, name, or role, and **Columns** to change which columns are visible. Each row carries three actions: **Change role**, **Reset PW**, and **Remove**.
+
+<Note>
+  Only **Tenant Admin** can invite users, remove users, or change a user's role.
+</Note>
+
+## Inviting a user
+
+<Steps>
+  <Step title="Open User Management">
+    Sign in at [dashboard.originhq.com](https://dashboard.originhq.com/), click **Settings** in the far-left rail, then select **User Management**.
+  </Step>
+  <Step title="Open the invite dialog">
+    Click **Invite user** at the top right.
+  </Step>
+  <Step title="Enter the email and pick a role">
+    Type the user's email address, then choose a role from the dropdown. It lists all eight built-in roles and defaults to **Viewer**.
+
+    The dialog shows the selected role's description beneath the field, so you can confirm the reach before sending.
+  </Step>
+  <Step title="Send the invite">
+    Click **Send invite**. The user receives a WorkOS invitation email and joins the organization once they accept.
+  </Step>
+</Steps>
+
+<Note>
+  The invite dialog collects an email and a role only.
+</Note>

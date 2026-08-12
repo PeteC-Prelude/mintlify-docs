@@ -1,0 +1,89 @@
+---
+title: "How to Report a Bug or Request a Feature in Origin"
+sidebarTitle: "Send Feedback"
+description: "Learn how to send a bug report or feature request to the Origin team directly from the console, and what information to include for faster resolution."
+---
+
+Origin includes a built-in **Report Issues** view in the console that lets you send a bug report or feature request directly to the Origin team without leaving the platform. When you submit a report, Origin attaches the endpoint context you select and any files you upload, so the team has the information they need to reproduce the issue or scope the request — often without any follow-up.
+
+## Opening the Report Issues View
+
+Navigate to **Report Issues** in the Origin console sidebar. At the top right of the header, a toggle lets you switch between **Bug** and **Feature request** mode. The form fields and the submit button label update automatically to match the report type you select.
+
+## Filling Out the Report Form
+
+Complete as many fields as you can. The more context you provide, the faster the team can act on your report.
+
+| Field | What to enter |
+|---|---|
+| **Title** | A short, one-line summary of the issue or request |
+| **What were you trying to do?** | The goal or task you were working on when the issue occurred |
+| **What happened?** | The actual behavior, including any error states or unexpected output you saw |
+| **What did you expect?** | The behavior you were expecting instead |
+| **Steps to reproduce** | An ordered list of the exact steps the team can follow to reproduce the issue on their side |
+
+<Tip>
+  Use the **Steps to reproduce** field even for feature requests — describing the workflow you were trying to complete helps the team understand the use case and prioritize appropriately.
+</Tip>
+
+## Adding Context and Attachments
+
+The right-hand rail of the Report Issues view contains two optional but highly recommended sections.
+
+**Affected Endpoint** — Search for and pin a specific endpoint to the report. This is optional, but it helps the team filter directly to the relevant host in their environment without needing to ask you for the hostname later.
+
+**Attachments** — Drag and drop files, or click **Choose files** to upload up to 10 attachments. Accepted formats include images, plain text, PDFs, JSON, ZIP, gzip, and tar archives. Screenshots of error states, exported logs, and diagnostic reports are all good candidates.
+
+## Submitting the Report
+
+Click **Submit bug** or **Submit feature request** (the label tracks the toggle you set at the top) to send the report to the Origin team. You do not need to follow up — the team will reach out if they need additional information.
+
+<Note>
+  For urgent production issues or situations where the built-in form is not accessible, contact Origin support directly. The support team can escalate and triage time-sensitive reports outside the normal queue.
+</Note>
+
+---
+
+## What to Include for Faster Resolution
+
+The fields below are not always required, but including them significantly reduces back-and-forth.
+
+<Accordion title="What logs should I include?">
+  For agent-related issues, include the runtime logs from the affected endpoint.
+
+  **Windows**
+  1. Click the Origin icon in the **system tray**.
+  2. Select **Open Log Folder**.
+  3. The folder `C:\ProgramData\Origin\Agent\Logs\` opens in Explorer. Zip the contents and attach them to your report.
+
+  **macOS**
+  1. Click the Origin icon in the **menu bar**.
+  2. Select **Open Log Folder**.
+  3. The folder `/Library/Origin/logs/` opens in Finder. Compress the folder and attach it to your report.
+
+  For console or platform issues that are not agent-related, include a screenshot of the affected view and your browser console output (open browser DevTools → **Console** tab, reproduce the issue, then copy the output).
+</Accordion>
+
+<Accordion title="How do I find my agent version?">
+  **Windows**
+  1. Click the Origin icon in the **system tray** to open the agent menu.
+  2. The agent version is displayed at the bottom of the menu.
+
+  Alternatively, open **Settings → Apps** (Windows 11) or **Control Panel → Programs and Features** (Windows 10), and look for **Origin Observability Agent** in the list.
+
+  **macOS**
+  1. Click the Origin icon in the **menu bar**.
+  2. The version string appears at the bottom of the dropdown menu.
+
+  Alternatively, run the following in Terminal:
+
+  ```bash
+  defaults read /Library/Origin/agent/Info.plist CFBundleShortVersionString
+  ```
+
+  Include the full version string (for example, `1.4.2`) in your report.
+</Accordion>
+
+<Tip>
+  If you are reporting a problem with the agent — such as missing AI events, a red or yellow tray icon, or an installation failure — attach the **Diagnostic Report** output to your ticket. To generate it: click the tray icon (Windows) or menu bar icon (macOS) → select **Run Diagnostics**. Copy or screenshot the full output, where every check should ideally read **OK**. Any failing line gives the team an immediate starting point.
+</Tip>

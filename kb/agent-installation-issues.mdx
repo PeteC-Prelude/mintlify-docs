@@ -1,0 +1,43 @@
+---
+title: "Troubleshoot Origin Agent Installation on Windows and macOS"
+sidebarTitle: "Installation Issues"
+description: "Diagnose and fix Origin agent installation failures on macOS and Windows, including missing dependencies, network errors, and extension approval issues."
+---
+
+Installation failures typically fall into one of three categories: a missing system dependency on the target endpoint, a network connectivity problem that blocks the registration step, or a healthy agent that isn't yet collecting. Checking the installer exit code or log output will usually point you to the right article below.
+
+<CardGroup cols={2}>
+  <Card title="Windows: Error -1073741515 (VC++ Missing)" icon="windows" href="/kb/windows-vc-error">
+    The installer exits with error `-1073741515` (`0xC0000135 STATUS_DLL_NOT_FOUND`) because the Microsoft Visual C\+\+ Redistributable is absent. Install the VC\+\+ runtime first, then re-run the Origin installer.
+  </Card>
+
+  <Card title="macOS: Agent Installed but No AI Events" icon="apple" href="/kb/macos-no-ai-events">
+    No AI activity appears in the console for a macOS endpoint. Confirm the agent and watchdog are running, and that Full Disk Access is granted to Origin.app.
+  </Card>
+
+  <Card title="Network Connectivity Requirements" icon="network-wired" href="/kb/network-connectivity">
+    The agent must reach two Origin-hosted endpoints over HTTPS during installation and ongoing operation. If either is blocked — by a firewall, proxy, or SASE gateway — installation will fail or telemetry will stop flowing.
+  </Card>
+
+  <Card title="Prerequisites & Known Issues" icon="triangle-exclamation" href="/kb/prerequisites">
+    Review the required Visual C\+\+ Redistributable version, necessary outbound endpoints, SASE traffic-steering compatibility notes, and Application Control considerations before deploying the agent at scale.
+  </Card>
+</CardGroup>
+
+## Issue types at a glance
+
+### Missing Visual C\+\+ Redistributable (Windows)
+
+When the Microsoft Visual C\+\+ 2015–2022 Redistributable is not present on a Windows endpoint, the Origin agent's binaries cannot load and the installer exits with error `-1073741515`. This is common on fresh OS images, minimal builds, and Windows Server Core installations. The fix is to install the VC\+\+ runtime before running the Origin installer — or to chain it as a prerequisite in Intune, SCCM, or MECM for fleet deployments.
+
+### Agent healthy but no AI events (macOS)
+
+If the agent installed and is running but no AI activity reaches the console, the usual cause is that **Full Disk Access** was never granted to Origin.app. The agent needs it to read application logs and detect AI tooling in user-scoped locations, so without it the agent runs but captures nothing. On MDM-managed fleets this is pre-approved by the PPPC profile.
+
+### Network connectivity failures
+
+The Origin agent contacts `registration.prod.originhq.com` during installation to exchange the provisioning token for a unique client certificate. If that endpoint is unreachable, the install fails and the agent is left uncertificated — it cannot authenticate even after connectivity is restored, so the install must be re-run. During normal operation, the agent relies on `endpoint.prod.originhq.com` for heartbeat, configuration, and AI event reporting. Both endpoints must be reachable on TCP 443 and must be excluded from TLS/SSL inspection by any proxy or SASE gateway in the path.
+
+### Prerequisites and known compatibility issues
+
+Before deploying at scale, confirm that the Visual C\+\+ Redistributable requirement is met, that both required endpoints are reachable, and that any SASE or Application Control solution is configured to allow the Origin agent to operate correctly. The prerequisites article covers all of these requirements in one place.

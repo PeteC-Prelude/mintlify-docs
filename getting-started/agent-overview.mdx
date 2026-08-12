@@ -1,0 +1,38 @@
+---
+title: "Origin Agent Installation: Supported Platforms and Methods"
+sidebarTitle: "Agent Overview"
+description: "The Origin agent is a background service for Windows and macOS that monitors AI traffic in real time. Learn supported OS versions and deployment methods."
+---
+
+The Origin agent supports latest versions of Windows 10, Windows 11, Windows Server 2022\+ and macOS 13 (Ventura) or later. The agent can be installed manually by an administrative user or it may be deployed using standard MDM/Management tools.
+
+The agent runs as a service and includes the core agent and a watchdog service.
+
+## Supported platforms
+
+| Platform | Minimum version |
+| --- | --- |
+| Windows 10 | Latest builds |
+| Windows 11 | Latest builds |
+| Windows Server | 2022 and later |
+| macOS | 13 (Ventura) or later |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="macOS Installation" icon="apple" href="/getting-started/macos-installation">
+    Run the `.pkg` installer, register the agent, and confirm it is reporting in the Origin dashboard.
+  </Card>
+
+  <Card title="Windows Installation" icon="windows" href="/getting-started/windows-installation">
+    Deploy the MSI silently with a provisioning JWT, with options for enhanced logging.
+  </Card>
+
+  <Card title="MDM Overview" icon="building" href="/getting-started/mdm-overview">
+    Push the agent fleet-wide using Jamf, Intune, or Tanium.
+  </Card>
+
+  <Card title="Verifying Installation" icon="circle-check" href="/getting-started/verifying-installation">
+    Confirm the agent is healthy and capturing AI activity using tray diagnostics, service checks, and test prompts.
+  </Card>
+</CardGroup>

@@ -1,0 +1,40 @@
+---
+title: "Installing the Origin Agent on Windows: MSI Silent Deploy"
+sidebarTitle: "Windows Install"
+description: "Silently deploy the Origin agent on Windows using the MSI installer with a provisioning JWT, with optional enhanced logging and OTEL configuration."
+---
+
+The MSI installer is available from the Origin Console. As noted in the prerequisites, this install option requires Microsoft Visual C\+\+ to be installed. An `.exe` installer is also available upon request and will install Microsoft Visual C\+\+ automatically if it is missing.
+
+## Silent Install (MSI)
+
+```bat
+msiexec /i origin-installer-x_y_z-windows-x64.msi /quiet PROVISIONING_JWT=<your_jwt_token> INSTALL_WINDIVERT=0
+```
+
+## Silent Install with Enhanced Logging
+
+```bat
+msiexec /i origin-installer-x_y_z-windows-x64.msi /quiet /norestart /l*v "C:\ProgramData\Origin\Agent\Logs\msi-install.log" PROVISIONING_JWT=<your_jwt_token> INSTALL_WINDIVERT=0
+```
+
+<Note>
+  **`INSTALL_WINDIVERT=0`**
+
+  This property is included on every install. Setting it requires a corresponding configuration change by your Origin TAM — coordinate with them before deploying at scale.
+</Note>
+
+## Log Locations
+
+| Log | Path |
+| --- | --- |
+| Install Log | `C:\ProgramData\Origin\Agent\Logs\install.log` |
+| Detailed MSI Log | `%temp%\Origin_Observability_Agent_xxxx.log` |
+| MSI Component Log | `%temp%\Origin_Observability_Agent_xxxx_OriginAgentMsi.log` |
+| Agent Runtime Logs | `C:\ProgramData\Origin\Agent\Logs\` |
+
+## System Tray Icon
+
+The Windows Origin install creates a system tray icon that provides visibility into the overall health of the agent, allows you to run a health diagnostic report, and provides quick access to agent logging.
+
+For a full end-to-end verification workflow, see [Verifying Agent Installations](/getting-started/verifying-installation).

@@ -1,0 +1,43 @@
+---
+title: "macOS: Origin Agent Installed but No AI Events Captured"
+sidebarTitle: "macOS No Events"
+description: "If no AI activity appears in the console, confirm the Origin agent is running and that Full Disk Access is granted to Origin.app."
+---
+
+If no AI activity is appearing in the Origin console for a macOS endpoint, there are two things to check.
+
+## 1. Confirm the agent is installed and running
+
+Both the agent and its watchdog must be up. The watchdog starts at boot and is responsible for keeping the core agent alive.
+
+```bash
+sudo launchctl list | grep origin
+```
+
+Two entries should appear — `com.origin.watchdog` and `com.origin.agent` — each with a non-zero PID in the first column.
+
+You can also check the **Origin** icon in the macOS menu bar: a green dot means the agent is healthy. The menu's Diagnostic Report gives a fuller picture and is worth attaching to any support ticket.
+
+## 2. Confirm Full Disk Access is granted
+
+The agent needs Full Disk Access to read application logs and detect AI tooling installed in user-scoped locations. Without it, the agent runs but captures nothing.
+
+1. Open **System Settings → Privacy & Security → Full Disk Access**.
+2. Find **Origin.app** in the list.
+3. Confirm its toggle is **on**. If Origin.app isn't listed, click **\+**, navigate to `/Applications`, select **Origin.app**, and click **Open**, then toggle it on.
+
+The agent starts capturing as soon as the toggle is enabled — no reinstall or reboot required.
+
+<Note>
+  On MDM-managed fleets, Full Disk Access is pre-approved by the privacy-preferences (PPPC) profile, so it should already be granted. If it isn't, the profile likely didn't reach the endpoint — see [MDM Overview](/getting-started/mdm-overview).
+</Note>
+
+## Still no events
+
+Attach the Diagnostic Report output and the agent logs to a support ticket:
+
+```bash
+open /Library/Origin/logs/
+```
+
+See [Report Issues](/kb/report-issues) for what to include.

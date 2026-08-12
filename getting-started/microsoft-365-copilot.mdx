@@ -1,0 +1,97 @@
+---
+title: "Capture Microsoft 365 Copilot Activity in Origin"
+sidebarTitle: "Microsoft 365 Copilot"
+description: "Capture Microsoft 365 Copilot prompts and responses across Word, Excel, Outlook, Teams, and Copilot Chat by reading Microsoft's own cloud APIs — no separate app, key, or credential."
+icon: "microsoft"
+---
+
+Origin captures Microsoft 365 Copilot activity by reading it directly from Microsoft's own cloud APIs. It pulls Copilot prompts and responses — across Word, Excel, Outlook, Teams, and Copilot Chat — and lands them in the same AI activity record as everything else Origin observes, attributed to the person who ran them.
+
+The [Microsoft Entra ID directory integration](/product/entra-id-setup) is a prerequisite. It is what authorizes Origin, through a single tenant-wide admin consent, and provides the identity mapping that attributes each Copilot interaction to a person. But the Copilot data itself doesn't come from the directory — it comes from a set of **Microsoft 365 and Microsoft Purview APIs** described below. There is no separate app, key, or credential to configure.
+
+## What it adds
+
+With Copilot capture on, Origin pulls each licensed user's Microsoft 365 Copilot prompts and responses and threads them into the same traces, analytics, and inventory as your other AI activity. Copilot usage can then be investigated alongside Claude, ChatGPT, and everything Origin captures on the endpoint — attributed to the right person and scoped to the users your directory integration syncs.
+
+It reads Copilot interaction history and its associated audit and usage signals only. Origin does not read the underlying documents, mailboxes, or chats that Copilot was working with, and it never writes to or changes anything in your Microsoft 365 tenant.
+
+## How Origin acquires Copilot data
+
+Copilot capture reads from several Microsoft services, all authorized by the one admin consent you grant on the Entra integration. No permission here is entered into Origin — each is a scope on Microsoft's side that the consent grants to Origin's managed application.
+
+| Consent permission | Microsoft service / API | What Origin gets |
+| --- | --- | --- |
+| Read all AI enterprise interactions | **Microsoft 365 Copilot interaction export API** (Microsoft Graph — `copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`) | The actual interaction content: user prompts and Copilot responses, per user, across Word, Excel, PowerPoint, Outlook, Teams, and Microsoft 365 Copilot Chat (BizChat), with timestamps, session/request IDs, and the app each interaction happened in. |
+| Read all audit log data | **Microsoft Purview** unified audit log (Copilot `CopilotInteraction` records) | The governance context around each interaction: which user, when, where (the host app), the files, emails, and sites Copilot accessed to answer, their sensitivity labels, whether the web or a plugin was used, and safety signals such as jailbreak / cross-prompt-injection detections. |
+| Read activity data for your organization | **Microsoft Graph usage reports** | Tenant Copilot usage and adoption metrics that complement the per-interaction record. |
+| (directory permissions) | **Microsoft Entra ID / Microsoft Graph** | Users, groups, and group membership — used to attribute each interaction to a person and to scope capture to the right users. |
+
+A few things follow from how these APIs work:
+
+- **The interaction export API is per user and licensing-gated.** Microsoft only returns Copilot interactions for users who hold a valid Microsoft 365 Copilot license, so Origin pulls Copilot data only for your synced, Copilot-licensed users.
+- **Purview auditing must be on.** Copilot interactions are written to the unified audit log automatically as part of Microsoft Purview Audit (Standard) — as long as auditing is enabled for your tenant, and it is by default for most tenants, there is nothing extra to turn on.
+- **Copilot Studio agents are out of scope.** Microsoft's interaction export API does not return interactions from custom agents built in Copilot Studio.
+
+<Note>
+  Microsoft documents these surfaces at [aiInteractionHistory: getAllEnterpriseInteractions](https://learn.microsoft.com/en-us/graph/api/aiinteractionhistory-getallenterpriseinteractions) and [Audit logs for Copilot and AI applications](https://learn.microsoft.com/en-us/purview/audit-copilot).
+</Note>
+
+## Before you start
+
+- A connected [Microsoft Entra ID directory integration](/product/entra-id-setup). Set that up first — Copilot capture depends on it for authorization and identity mapping.
+- **Microsoft 365 Copilot licensing** for the users whose activity you want to capture. Microsoft's interaction export API only returns data for licensed users.
+- **Microsoft Purview auditing enabled** for your tenant, which is on by default for most tenants. This is what records Copilot interactions to the audit log.
+- An **Origin admin**, to enable capture and run the readiness check.
+
+## Setup
+
+<Steps>
+  <Step title="Connect the Entra directory integration">
+    If you haven't already, follow [Microsoft Entra ID Setup](/product/entra-id-setup) to connect your directory.
+
+    When you grant admin consent, the permission list already includes **Read all AI enterprise interactions** — that's what makes Copilot capture possible. No extra consent is needed later.
+  </Step>
+  <Step title="Enable Copilot capture in Origin">
+    1. Sign in to the Origin dashboard at [dashboard.originhq.com](https://dashboard.originhq.com/) as an admin.
+    2. Open **Settings → Settings** (Rules and integrations) and scroll to **Microsoft 365 Copilot capture**.
+    3. Each connected Microsoft Entra directory appears as its own card, showing **Connected**. Find the directory you want and turn on **Capture Copilot activity**.
+
+    Capture is scoped to that directory's synced users, so it follows the sync scope — whole tenant or selected groups — that you set on the directory integration.
+  </Step>
+  <Step title="Run the readiness check">
+    Enabling capture reveals a **Readiness** section. Capture is on but **blocked until the Microsoft-side prerequisites pass**.
+
+    1. Click **Re-check**, shown as **Check readiness** before capture is enabled. This makes live calls to the Microsoft APIs above to confirm capture will work — that the admin consent covers the required scopes, that Copilot interaction data is retrievable, and that the audit and usage data are available for the tenant.
+    2. Review the results. Once the prerequisites pass, capture starts.
+
+    If the check reports a problem, resolve it — most often Copilot licensing or incomplete admin consent, see [Troubleshooting](#troubleshooting) — and press **Re-check** again.
+  </Step>
+</Steps>
+
+## What to expect
+
+Once readiness passes, Copilot activity flows continuously into your traces, analytics, and inventory, attributed to each person, alongside the rest of your captured AI activity. There is nothing to export and no schedule to manage.
+
+## Changing or removing capture
+
+- **Pause capture** — turn off **Capture Copilot activity** for a directory. New Copilot activity stops syncing; data already in Origin is unaffected.
+- **Re-scope** — capture follows the directory's sync scope. To change which users are covered, adjust the **Sync scope** on the [directory integration](/product/entra-id-setup).
+- **Remove entirely** — removing the Entra directory integration also ends Copilot capture, since the two share the same consent.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Resolution |
+| --- | --- | --- |
+| No **Microsoft 365 Copilot capture** card, or it isn't **Connected** | No connected Entra directory integration | Connect the [Entra directory integration](/product/entra-id-setup) first. |
+| Capture is on but shows "blocked until the required prerequisites pass" | Readiness hasn't been run, or a prerequisite failed | Click **Re-check** and resolve any reported issue. |
+| Readiness fails on permissions / consent | Admin consent was partial, or the AI interactions permission wasn't granted | Re-run admin consent on the directory integration with an eligible admin, then **Re-check**. |
+| Readiness passes but no Copilot activity appears | Users aren't Copilot-licensed, aren't in scope, or haven't used Copilot recently | Confirm Copilot licensing and that the users are within the directory's sync scope, then use Copilot and wait for the next sync. |
+| Readiness fails on auditing | Microsoft Purview auditing is turned off for the tenant | Enable auditing in the Microsoft Purview portal, then **Re-check**. |
+| Copilot Studio agent activity is missing | Microsoft's interaction export API doesn't return Copilot Studio agent interactions | This is a Microsoft API limitation, not an Origin configuration issue. |
+
+## What Origin accesses
+
+- **Read-only** access to **Microsoft 365 Copilot interaction history** (prompts and responses) for the directory's synced, Copilot-licensed users, through the Microsoft Graph interaction export API.
+- **Read-only** access to the **Microsoft Purview Copilot audit records** for those interactions — the identity, timing, host app, accessed resources, sensitivity labels, and safety signals — and to tenant **Copilot usage reports**.
+- All of the above is authorized by the single tenant-wide admin consent granted on the Entra integration. Nothing is entered into Origin.
+- **No access** to the documents, mailboxes, or chats behind those interactions, and no ability to write to or change anything in your Microsoft 365 tenant.

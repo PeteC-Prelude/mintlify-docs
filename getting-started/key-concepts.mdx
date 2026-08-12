@@ -1,0 +1,70 @@
+---
+title: "Key Concepts in Origin: Terminology and Data Model"
+sidebarTitle: "Key Concepts"
+description: "Understand Origin's core terms — endpoints, agents, sessions, clusters, skills, and the analytics graph — before deploying or exploring the dashboard."
+---
+
+Before you deploy Origin or start exploring the console, it helps to understand the vocabulary Origin uses to describe your environment. The terms below map directly to objects you'll see in the dashboard, query through the chat interface, and reference in documentation. Each concept builds on the previous ones, so reading through in order gives you a solid mental model of how data flows from your endpoints to your console.
+
+## Glossary
+
+<ResponseField name="Endpoint">
+  A managed macOS or Windows device where the Origin agent is installed and actively reporting. Each endpoint appears in the Registered Endpoints view with its own telemetry status, agent version, and activity history. One physical or virtual machine corresponds to one endpoint record in your tenant.
+</ResponseField>
+
+<ResponseField name="Origin Agent">
+  The lightweight background service installed on each endpoint that collects and reports AI inventory and event data. The agent collects AI event data using Otel, application hooks and other methods before streaming that data to your Origin tenant. It applies fleet-wide configuration settings pushed from the console on each heartbeat cycle.
+</ResponseField>
+
+<ResponseField name="AI Agent / Provider">
+  An AI tool or API that the Origin agent observes — for example, Claude desktop, Claude CoWork, ChatGPT Desktop, Codex, Gemini CLI or GitHub Copilot.  Origin ships with built-in detection rules for the most common AI agents and providers.
+</ResponseField>
+
+<ResponseField name="Session">
+  A single, discrete conversation or interaction between a user and an AI provider. A session groups together all of the prompts and responses that belong to one continuous exchange. Sessions are the primary unit you navigate when investigating activity on a specific endpoint.
+</ResponseField>
+
+<ResponseField name="Prompt">
+  An individual request sent by a user to an AI model, along with the model's response. Prompts are the lowest-level unit of AI activity that Origin captures. Each prompt is timestamped, attributed to a user and endpoint, and associated with the session it belongs to.
+</ResponseField>
+
+<ResponseField name="Activity Cluster">
+  A semantically grouped set of AI prompts that Origin has automatically identified as belonging to the same topic or work pattern. Clusters are named automatically based on the content of the prompts they contain. They help you understand _what_ AI is being used for across your fleet without reading every individual prompt.
+</ResponseField>
+
+<ResponseField name="Provisioning Token (JWT)">
+  A signed JSON Web Token that authorizes an Origin agent installation to register with your specific tenant. You generate provisioning tokens from the Settings panel and supply them during agent installation — either interactively or silently via an MDM deployment script. Treat a provisioning token like a password: rotate it if it is compromised and do not commit it to source control.
+</ResponseField>
+
+<ResponseField name="Tenant">
+  Your organization's isolated Origin account. All endpoints, users, sessions, configuration settings, and telemetry data in your deployment belong to a single tenant. Users from outside your tenant cannot access your data, and your tenant's configuration does not affect any other organization.
+</ResponseField>
+
+<ResponseField name="Skills">
+  Folders of instructions, scripts, and resources that an AI assistant loads dynamically to improve its performance on specialized tasks. Skills teach an AI how to complete specific workflows in a repeatable, consistent way — whether that's following company brand guidelines, executing a standard analysis routine, or automating a recurring task. Skills can be created by individual users, provisioned by an organization, or sourced from third-party providers.
+
+  Origin inventories all skills present on Origin-managed endpoints, giving administrators visibility into which skills are installed across the fleet, their versions, and how frequently they're being used. Administrators can also deploy approved skills to managed devices directly from the Origin console, ensuring teams use standardized, vetted capabilities.
+</ResponseField>
+
+<ResponseField name="Analytics Graph">
+  The underlying data model that powers both the Origin dashboards and the natural-language chat interface. The analytics graph connects endpoints, users, sessions, prompts, and clusters into a unified, queryable structure. When you ask Origin a question in the chat interface, it queries the analytics graph to generate its answer.
+</ResponseField>
+
+## Quick-reference table
+
+| Term | One-line definition |
+| --- | --- |
+| **Endpoint** | A managed device (macOS or Windows) with the Origin agent installed |
+| **Origin Agent** | The lightweight service that collects AI event data via OTel and application hooks |
+| **AI Agent / Provider** | An AI tool or API being observed (e.g. Claude, Copilot, ChatGPT) |
+| **Session** | A single conversation or interaction with an AI provider |
+| **Prompt** | An individual request-and-response pair sent to an AI model |
+| **Activity Cluster** | A semantically grouped, auto-named set of related prompts |
+| **Provisioning Token (JWT)** | The credential used to register an agent against your tenant |
+| **Tenant** | Your organization's isolated Origin account |
+| **Skills** | Uploadable behavioral units available to the Origin AI assistant |
+| **Analytics Graph** | The data model powering dashboards and the chat interface |
+
+<Tip>
+  When you're ready to see these concepts in action, start with the [Console Setup](/getting-started/console-setup) guide to configure your tenant, then move on to deploying the agent to your first endpoint.
+</Tip>

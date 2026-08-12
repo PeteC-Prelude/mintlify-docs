@@ -1,0 +1,279 @@
+---
+title: "Silent Fleet Deployment of the Origin Agent via Jamf Pro"
+sidebarTitle: "Jamf Pro"
+description: "Silently deploy the Origin macOS agent fleet-wide using Jamf Pro — one PPPC profile, a JWT staging script, and a zero-touch install policy."
+---
+
+A step-by-step walkthrough for silent deployment of the Origin macOS agent — configuration profile, install script, and end-to-end Jamf Pro workflow.
+
+## Step 01 — Prerequisites
+
+Confirm the following before proceeding:
+
+- **Jamf Pro admin access** (scope permitting profile creation, package upload, policies, and scripts).
+- **A valid Origin provisioning JWT** (install token) — obtain from the Origin console under **Settings → Installers**.
+- **The Origin macOS installer** — download from the Origin console under **Settings → Installers**. Delivered as `Origin.pkg`.
+- **The configuration profile and install script** bundled with this guide (see files inventory in Step 03).
+- **Target macOS devices enrolled in Jamf Pro** with User-Approved MDM (UAMDM).
+
+<Note>
+  **Where to find it**
+
+  Both the `.pkg` installer and the provisioning JWT live in the same place in the Origin console: **Settings → Installers**. Grab both before moving into Jamf.
+
+  Download the configuration profile from [MDM Overview](/getting-started/mdm-overview): [**origin-privacy.mobileconfig.txt**](/files/origin-privacy.mobileconfig.txt) — rename it to `origin-privacy.mobileconfig` after downloading. The install script is provided in full in Step 05 below.
+</Note>
+
+## Step 02 — Scope of Automation
+
+One macOS permission stands between the installer and a fully registered agent. MDM pre-approves it — no user interaction is required.
+
+| Permission | Pre-approved by Profile? | User Action |
+| --- | --- | --- |
+| Full Disk Access | Yes | None |
+
+Deploying the privacy configuration profile before the package installs ensures the agent can register silently without any user-facing permission dialogs.
+
+## Step 03 — Files
+
+The configuration profile is downloadable from the docs site. The install script is reproduced in full in Step 05 — copy it straight into Jamf.
+
+| File | Purpose |
+| --- | --- |
+| `origin-privacy.mobileconfig` | PPPC profile — grants Full Disk Access to the Origin agent. |
+| `jamf-install-origin.sh` | Pre-install shell script that stages the provisioning JWT for the `.pkg` postinstall. |
+
+### Identifiers
+
+| Identifier | Value |
+| --- | --- |
+| Team ID | `D3C73MWD7Y` |
+| Agent bundle ID | `com.origin.agent` |
+
+## Step 04 — Deployment Order
+
+The privacy configuration profile should land on the endpoint before the `.pkg` installs — otherwise the agent hits a Full Disk Access prompt on first run. Follow this order:
+
+1. **Privacy preferences (PPPC)** (`origin-privacy.mobileconfig`) — Grants Full Disk Access to the Origin agent based on Team ID `D3C73MWD7Y` and bundle ID `com.origin.agent`. Eliminates the TCC prompt that would otherwise appear on first run.
+2. **The Origin .pkg (via policy)** (`Origin.pkg`) — The installer itself. Deployed via a Jamf policy with the install script running before the package to stage the provisioning JWT. See Step 05 for the full policy setup.
+
+## Step 05 — Jamf Pro Walkthrough
+
+The following sequence assumes you have the `origin-privacy.mobileconfig` profile plus the `.pkg` and install script staged locally.
+
+### 01. Upload the configuration profile
+
+The `origin-privacy.mobileconfig` file must be uploaded as a **raw custom profile**. Do not use Jamf's built-in PPPC payload editor — it rewrites the XML and breaks the code requirement.
+
+<Note>
+  **Upload location**
+
+  The **Upload** button is on the Configuration Profiles list page (**Computers → Configuration Profiles**), not inside the New Profile editor. Navigate to the list first, then click **Upload** to import a raw `.mobileconfig` file.
+</Note>
+
+1. Jamf Pro → **Computers → Configuration Profiles**.
+2. Click **Upload** on the list page.
+3. Upload `origin-privacy.mobileconfig`.
+4. Under the **Scope** tab, add your target devices or Smart Group.
+5. Click **Save**.
+
+<Warning>
+  **Verify before proceeding**
+
+  Before moving to package installation, confirm the Origin privacy profile is installed using either method:
+
+  **UI:** On the Mac go to **System Settings → Privacy & Security → Profiles** (or search "Device Management"). The **Privacy Preferences** profile should appear in the managed profiles list.
+
+  **Terminal:**
+
+  ```bash
+  sudo profiles show -all | grep -i "origin"
+  ```
+
+  This should return the Origin privacy profile. Do not proceed until it is confirmed.
+</Warning>
+
+### 02. Upload the Origin package
+
+1. Jamf Pro → **Settings → Computer Management → Packages → Upload Package**.
+2. Upload `Origin.pkg`.
+3. Leave defaults (Category, Priority, Fill User Template, etc.) unless you have site-specific conventions.
+4. Click **Save**.
+
+### 03. Create the install script
+
+The script stages the provisioning JWT to `/var/tmp/origin-provisioning-jwt` so the `.pkg` postinstall can read it silently. The file is deleted after use.
+
+1. Jamf Pro → **Settings → Scripts → New**.
+2. Name the script `Origin Installer`.
+3. On the **Script** tab, paste the contents below, replacing the empty `JWT=""` value with your provisioning token from **Settings → Installers**.
+4. Click **Save**.
+
+```bash
+#!/bin/bash
+# Origin Agent -- Jamf Silent Install Script
+# Stages the JWT for the .pkg postinstall to read.
+# The postinstall deletes the file after use.
+set -euo pipefail
+####################################################################
+# EDIT THIS: paste your provisioning JWT between the quotes
+JWT=""
+####################################################################
+if [[ -z "$JWT" ]]; then
+  echo "Error: JWT not configured. Edit the script and set the JWT variable."
+  exit 1
+fi
+JWT_FILE="/var/tmp/origin-provisioning-jwt"
+install -m 600 /dev/null "$JWT_FILE"
+echo "$JWT" > "$JWT_FILE"
+echo "JWT staged for Origin installer."
+```
+
+<Note>
+  **Why the token lives in the script body**
+
+  Jamf script parameters are capped at 255 characters, which is too short for a provisioning JWT. The token goes directly into the script body. Any Jamf admin with script-view permissions will be able to read it — scope admin permissions accordingly.
+</Note>
+
+### 04. Create the install policy
+
+1. Jamf Pro → **Computers → Policies → New**.
+
+**General Tab**
+
+| Field | Value |
+| --- | --- |
+| Display Name | Install Origin Agent |
+| Trigger | Custom event: `install-origin` and **Enrollment Complete** |
+| Execution Frequency | Once per computer |
+
+**Packages Tab**
+
+| Field | Value |
+| --- | --- |
+| Package | `Origin.pkg` |
+| Action | Install |
+
+**Scripts Tab**
+
+| Field | Value |
+| --- | --- |
+| Script | Origin Installer |
+| Priority | **Before** |
+
+**Scope Tab**
+
+| Field | Value |
+| --- | --- |
+| Target | Add the same target devices or Smart Group used for the configuration profile. Click **Save**. |
+
+<Warning>
+  **Script priority must be Before**
+
+  If the script runs **After** the package, the JWT file won't exist when the postinstall needs it and the installer will fall back to the GUI prompt. Double-check the priority before saving.
+</Warning>
+
+### 05. Trigger the policy
+
+On a target device, run the custom trigger from Terminal:
+
+```bash
+sudo jamf policy -event install-origin
+```
+
+<Note>
+  **Authentication note**
+
+  Running `sudo jamf policy -event install-origin` manually will prompt for interactive password authentication on the endpoint. If you prefer the install to run without any user interaction, simply wait for the device to check in naturally (on enrollment complete or the next recurring check-in) rather than forcing it with the manual command.
+</Note>
+
+The script stages the JWT → Jamf installs the `.pkg` → the postinstall reads the staged JWT and registers silently → the JWT file is deleted. The MDM profile handles the Full Disk Access grant with no user interaction required.
+
+## Step 06 — Verification
+
+Run these on a target endpoint after the policy completes. Each command confirms a different stage of the install pipeline is healthy.
+
+**Profile installed**
+
+```bash
+sudo profiles show -all | grep -i "origin"
+```
+
+Should return the Origin privacy profile.
+
+**Agent process running**
+
+```bash
+pgrep -x origin
+```
+
+Returns a PID when the agent is running.
+
+**Agent log tail**
+
+```bash
+cat /Library/Origin/logs/agent.log.$(date -u +%Y-%m-%d)
+```
+
+Prints today's agent log. Useful for confirming the agent has started cleanly, registration succeeded, and there are no errors after install.
+
+### Origin menu bar icon
+
+Once the agent is running, the Origin menu bar icon appears in the macOS menu bar. Click it to confirm the agent is active and to access two operator-friendly checks without dropping to Terminal:
+
+- **Generate diagnostic report** — bundles agent state, recent logs, and registration status into a single file you can hand to Origin support.
+- **View logs** — opens the local log directory directly, equivalent to the `cat` command above without needing the date.
+
+<Note>
+  **Origin console verification**
+
+  In the Origin console, click **Computers** in the left-hand navigation, then search for the target hostname. A successfully registered endpoint will appear in the list with a recent snapshot time and its detected AI agents populated.
+</Note>
+
+## Step 07 — Troubleshooting
+
+### Profile shows "Failed" in Jamf
+
+Check the error in the device's Management History. The two most common causes:
+
+- **Code requirement no longer matches** — the profile was recreated in Jamf's payload editor, which rewrites the XML. Re-download [origin-privacy.mobileconfig](/files/origin-privacy.mobileconfig) and upload it as a raw profile instead.
+- **Profile stuck pending** — run `sudo jamf policy` on the device to force a check-in.
+
+### Full Disk Access not granted despite profile
+
+- Verify the profile actually installed:
+  ```bash
+  sudo profiles show -all | grep -i "origin"
+  ```
+- The PPPC profile's code requirement matches Developer ID signed builds with Team ID `D3C73MWD7Y`. Ad-hoc signed or internal development builds won't match and FDA will not pre-grant.
+
+### JWT prompt still appears on install
+
+- Verify the script ran successfully — check the policy logs in Jamf Pro.
+- Confirm script priority is **Before**, not **After**.
+- On the endpoint, confirm the file existed before the `.pkg` ran: `/var/tmp/origin-provisioning-jwt`.
+
+## Step 08 — Alternative Deployment Paths
+
+### Kandji
+
+1. **Library → Add New → Custom Profile** for the `.mobileconfig`.
+2. Assign to device blueprints.
+3. Add the `.pkg` as a **Custom App**.
+4. Use a pre-install script to stage the JWT (same pattern as the Jamf script above).
+
+### Headless CLI install
+
+For scripted deployments outside of any MDM — useful for lab environments, golden-image prep, or emergency reinstalls:
+
+```bash
+echo "eyJ..." > /var/tmp/origin-provisioning-jwt
+chmod 600 /var/tmp/origin-provisioning-jwt
+installer -pkg Origin.pkg -target /
+```
+
+The postinstall reads the JWT from the staged file and skips the GUI prompt. The file is deleted after use.
+
+<Note>
+  Without the privacy profile, the end user will see the Full Disk Access prompt on first run — this path is best reserved for managed endpoints that already have the profile from an earlier MDM state, or lab machines where the prompt is acceptable.
+</Note>

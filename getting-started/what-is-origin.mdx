@@ -1,0 +1,59 @@
+---
+title: "What is Origin?   "
+sidebarTitle: "Overview"
+description: "Endpoint AI Observability Explained  "
+---
+
+Origin inventories and monitors every AI agent on your endpoints, giving you complete audit trails, behavioral baselines, and incident investigation tools.
+
+Origin is an endpoint AI observability platform that inventories, observes, and measures the usage of AI agents at scale. It gives your security and operations teams the operational intelligence they need to understand the state of AI across your organization — from individual prompts all the way up to fleet-wide behavioral patterns. This visibility is the foundation for everything from making defensible AI investment decisions to maximizing adoption and efficiency without compromising security.
+
+## How Origin works
+
+Origin installs a lightweight agent on each managed endpoint (macOS or Windows). That agent collects AI inventory and event data and streams it back to your Origin tenant.
+
+Capture happens at the application layer, not the network layer. Origin collects AI event data two ways on the endpoint:
+
+- **OpenTelemetry** — the agent configures each AI tool's native OTel exporter to report to a local collector on the endpoint, then forwards that telemetry to your tenant.
+- **Application-level hooks** — for applications that expose no telemetry of their own.
+
+Activity that never touches an endpoint — `claude.ai` in a browser, Microsoft 365 Copilot — is read directly from the provider's own cloud APIs instead. See [AI Provider Support](/getting-started/ai-providers) for which applications are captured by which method.
+
+The console then surfaces that data as searchable sessions, activity clusters, behavioral baselines, and an interactive chat interface — so you can investigate incidents, satisfy compliance requirements, and understand how AI is actually being used across your fleet.
+
+## Key capabilities
+
+<CardGroup cols={2}>
+  <Card title="Investigations" icon="magnifying-glass">
+    Trace any security incident or policy violation back to its origin prompt. Origin gives you a full timeline of every AI interaction on every endpoint, so you can reconstruct exactly what happened, when, and who was responsible.
+  </Card>
+
+  <Card title="Audit & Compliance" icon="shield-check">
+    Maintain a complete, tamper-evident record of every prompt sent and every AI agent decision made across your organization. Use this audit trail to satisfy internal reviews, regulatory inquiries, or eDiscovery requests.
+  </Card>
+
+  <Card title="Inventory & Visibility" icon="list-check">
+    Automatically discover and catalog every AI tool and computer-use agent running on your endpoints — including shadow AI you didn't know existed. No manual asset tracking required.
+  </Card>
+
+  <Card title="Behavioral Baselines" icon="chart-line">
+    Understand what "normal" AI usage looks like for each user, team, or endpoint. Origin uses this baseline to surface anomalies — unusual prompt volumes, new AI providers, or out-of-pattern activity — before they become incidents.
+  </Card>
+</CardGroup>
+
+## The Origin agent
+
+The Origin agent is a lightweight background service that runs on each managed endpoint. It collects AI event data from the applications running on that host — via their OpenTelemetry exporters and, where those don't exist, application-level hooks — and streams it to your Origin tenant in real time, encrypted in transit.
+
+The agent is designed to be invisible to end users by default: it runs silently, has no user-facing UI unless you choose to show the tray icon, and picks up configuration your administrators push from the console on each heartbeat.
+
+## What you can do with Origin
+
+Once Origin is deployed across your fleet:
+
+- **Complete AI inventory** — every AI agent installed and running on your managed devices, discovered automatically with no manual asset tracking.
+- **Shadow AI discovery** — every AI provider in use across your organization, including tools your IT and security teams haven't approved.
+- **Incident investigation** — replay the full prompt-and-response timeline for any session on any endpoint.
+- **Activity clustering** — identify what kinds of work employees are offloading to AI tools.
+- **Behavioral baselines** — receive alerts when usage patterns deviate from the norm.
+- **Natural-language fleet queries** — ask questions of your own telemetry data through the Origin chat interface.
